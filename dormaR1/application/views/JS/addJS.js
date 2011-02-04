@@ -330,6 +330,8 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 	if(document.getElementById("radio_ctr1")){
+		/* --------------------------- Radio ----------------------------- */
+		
 		if (radio_ctr1.value != "")
 		{
 			if (radio_inst1.value != "")
@@ -543,9 +545,10 @@ function validateForm(residentForm)
 		}
 
 	}
+	return proceed;
 }
 	
-	return proceed;
+//	return proceed;
 }
 
 
