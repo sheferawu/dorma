@@ -1,16 +1,26 @@
 <?php
-echo "<center>SHD Revised Accomplishment Report 2010<br/></center>";
-echo "<center>STUDENT HOUSING DIVISION<br/></center>";
-echo "<center>UPLB HOUSING OFFICE<br/></center>";
-echo "<center>UP LOS BANOS, COLLEGE, LAGUNA<br/></center>";
-echo "<center>Accomplishment Report for the Month of OCTOBER 2010<br/></center>";
+unset($_SESSION['report_upper']);
+unset($_SESSION['report_header']);
+unset($_SESSION['report_values']);
 
-echo "<center>Total Capacity of Occupancy: 288<br/>";
 
+$header="<center>SHD Revised Accomplishment Report 2010<br/></center>";
+$header.="<center>STUDENT HOUSING DIVISION<br/></center>";
+$header.="<center>UPLB HOUSING OFFICE<br/></center>";
+$header.="<center>UP LOS BANOS, COLLEGE, LAGUNA<br/></center>";
+$header.="<center>Accomplishment Report for the Month of OCTOBER 2010<br/></center><br/>";
+
+$_SESSION['report_upper'] = $header;
+echo $header;
+
+echo "<center>Total Capacity of Occupancy: $occ<br/>";
+//print_r($part1Table1);
+//if(trim($part1Table1)!=""){
 $table1 = "<table border = \"1\">";
 $table1.="<tr><th rowspan=\"2\">Sex</td><th rowspan=\"2\">No.</th><th rowspan=\"2\">Percentage of Occupancy</th><th rowspan=\"1\" colspan =\"2\">Checked</th><th rowspan=\"1\" colspan =\"4\">Classification</th></tr>";
 $table1.="<tr><th>In</th><th>Out</th><th>Freshman</th><th>Sophomore</th><th>Junior</th><th>Senior</th></tr>";
 bcscale(2);
+if(isset($part1Table1[0])){
 $percent = $part1Table1[0]/$occ;
 $percent = bcmul((string)$percent,"100");
 $percent.="%";
@@ -24,11 +34,13 @@ $prev = explode(",",$prevAccRe);
 
 
 $acc = explode(",",$accRe);
+}
 echo $table1."</table>";
-
+//}
 
 echo "Note: Attach names of students who checked in/out<br>";
 echo "Percentage of Occupancy=(Total # of accommodated students/total capacity of dormitory)*100%<br><br>";
+if($appData!=""){
 echo "B. Units of Appliances";
 
 $table2 = "<table border = \"1\">";
@@ -80,42 +92,63 @@ foreach ($con as $i){
 $table2.="<td>$totalIn</td></tr>";
 	
 echo $table2."</table><br><br>";
-
+}
 //table3 is for transient
+echo "C. Transient Accomodation<br/>";
+if($transData!=""){
+$table3 ="<table border=\"1\">";
+$table3.="<tr><th rowspan=\"2\">Type</th><th rowspan=\"2\">Total</th><th colspan=\"2\">Rates</th><th rowspan=\"2\" >Total Amount Collected<th/></tr>";
+$table3.="<tr><th>UP</th><th>Non-UP</th></tr>";
+$sumIndi = 0;
+if(trim($transData[4])!=""){
+	$sumIndi = $transData[4];
+}
+$x = $transData[0]+$transData[1];
+$table3.="<tr><td>INDIVIDUAL</td><td>$x</td><td>$transData[0]</td><td>$transData[1]</td><td>$sumIndi</td></tr>";
+$sumG = 0;
+if(trim($transData[5])!=""){
+	$sumG = $transData[5];
+}
+$x = $transData[2]+$transData[3];
+$table3.="<tr><td>GROUP</td><td>$x</td><td>$transData[2]</td><td>$transData[3]</td><td>$sumG</td></tr>";
 
+echo $table3."</table>";
+}else{
+	echo"No transient Found";
+}
+if($accCol!=""){
 $accCol = explode(",",$accCol);
+if($accCol[0]!=""){
+	
 $table4="<table border=\"1\">";
 $table4.="<tr><th>Classification</th><th>Total Amount of collection for the<br/> Month</th><th>Percentage of Collection for the Month</th></tr>";
 bcscale(2);
+if(isset($acc)){
+if(($accCol[0]+$acc[1]+$prev[1])!=0){
 $dormPercent = bcdiv((string)$accCol[0],(string)($accCol[0]+$acc[1]+$prev[1]));
+}else{
+	$dormPercent="undefined";
+}
+if(($accCol[1]+$acc[2]+$prev[2])!=0){
 $appPercent =  bcdiv((string)$accCol[1],(string)($accCol[1]+$acc[2]+$prev[2]));
+}else{
+	
+	$appPercent ="undefined";
+}
+}
 bcscale(0);
+if(isset($dormPercent)){
 $dormPercent = bcmul($dormPercent,"100");
 $appPercent = bcmul($appPercent,"100");
 $table4.="<tr><th>Dormitory</th><td>$accCol[0]php</td><td>$dormPercent%</td></tr>";
 $table4.="<tr><th>Appliance</th><td>$accCol[1]php</td><td>$appPercent%</td></tr>";
 
+
 echo "D.Actual Collections for Dormitory and Appliances Fees<br>";
-echo $table4."</table>";
-/*
-$table5 ="<table border = \"1\" >" ;
-$table5 ="<tr>"."<td>Type of Residents</td>"."<td>Current</td>".
-"<td>Previous</td>".
-"<td>Fees</td>".
-"<td>Dormitory</td>".
-"<td>Current</td>".
-"<td>Previous</td>".
-"<td>Appliance</td>".
-"<td>Current</td>".
-"<td>Previous</td>".
-
-"<td>Total</td>".
-"<td>Current</td>".
-"<td>Previous</td>";
-echo $table5."</tr></table>";
-*/
-
-
+echo $table4."</table>";}
+}
+}
+if(isset($acc)){
 echo "*Percentage of Collection=(Total Amount of Collection)/(Total collection + Total amount of receivables)*100%<br><br>";
 echo "E. Accounts Receivable<br>";
 $table5 = "<table border=\"1\">";
@@ -127,4 +160,6 @@ echo $table5."</table>";
 echo "<br/>F.Repairs, Maintenance Works and Projects <br/>";
 echo $table6."</center>";
 
+echo "<br/><a class=\"genRepTxt\" href=\"index.php?c=option&m=excel&fn=accomplishmentreport\">Click here to generate report</a>";
+}
 ?>

@@ -1,10 +1,13 @@
-<?php 			
-			 $numClus= count($arrClus);
+<?php 		$numClus= count($arrClus);
 			 $str="";
-			foreach($arrClus as $a){
+			 if(is_array($arrClus)){ 
+			 foreach($arrClus as $a){
 		 	
 		 		$str.=$a."*";
 		 	}
+			 }else{
+			 	$numClus = 0;
+			 }
 		 	$iteration= 0;
 			$str = substr($str,0,strlen($str)-1);
 			$fNamePay=$_SESSION["fNamePay"];
@@ -12,7 +15,7 @@
 			$lNamePay=$_SESSION["lNamePay"];
 			
 			echo "NAME :<u>". $_SESSION["fNamePay"]." ".$_SESSION["mNamePay"]." ".$_SESSION["lNamePay"]."</u><br/><br/>";
-			
+			echo "<br/>Check In Date: $checkIn";
 			echo "<center>RECORD OF PAYMENTS FOR SCHOOL YEAR $sy</center>";
 			?>
 		
@@ -29,11 +32,12 @@
 			
 				<?php 	$x=0;
 				$tr = "";
-						$this->load->database();
-						$this->db->where('FirstName', $_SESSION["fNamePay"]); 
-						$this->db->where('LastName', $_SESSION["lNamePay"]); 
-						$this->db->where('MidName', $_SESSION["mNamePay"]); 
-						$pay= $this->db->get('payment'); 
+						  $this->{'dorm'} = $this->load->database('dorm', TRUE);
+    	
+						$this->{'dorm'}->where('FirstName', $_SESSION["fNamePay"]); 
+						$this->{'dorm'}->where('LastName', $_SESSION["lNamePay"]); 
+						$this->{'dorm'}->where('MidName', $_SESSION["mNamePay"]); 
+						$pay= $this->{'dorm'}->get('payment'); 
 					if(count($pay->result())>0){
 						$iArr =  Array('term','periodcovered', 'ornum', 'dormfee','appfee','transfee','datepaid','remarks');
 						
@@ -42,12 +46,9 @@
 							foreach ($pay->result() as $row){
     						$cnt=0;
 							
-    							//$term=explode("@",$row->Term);
+    							
 								$pc=explode("@",$row->PeriodCovered);
 								$or=explode("@",$row->Ornum);
-								//$df=explode("@",$row->DormFee);
-								//$af=explode("@",$row->AppFee);
-								//$tf=explode("@",$row->TransFee);
 								$dp=explode("@",$row->DatePaid);
 								$rem=explode("@",$row->Remarks);
 								$iteration= count($pc);
@@ -56,12 +57,9 @@
 								$tr .= "<tr>";
 								$tr.="<td >OK</td>";
 								
-								//$tr.="<td >$term[$x]</td>";
 								$tr.="<td >$pc[$x]</td>";
 								$tr.="<td >$or[$x]</td>";
-								//$tr.="<td >$df[$x]</td>";
-								//$tr.="<td >$af[$x]</td>";
-								//$tr.="<td >$tf[$x]</td>";
+								
 								$tr.="<td >$dp[$x]</td>";
 								$tr.="<td >$rem[$x]</td>";
 								$tr .= "<tr/>";
@@ -74,11 +72,14 @@
 							
 					
 						
-				}
-
-							if(($x+1)!=$numClus){
+				}			$date2 = new DateTime($checkIn);
+								
+							if($numClus>0){
 								$ni=$numClus+$iteration;
 								for($x;$x<$numClus;$x++){
+								$arr = explode("-",$arrClus[$x]);
+								$date1 = new DateTime($arr[1]);
+								if($date1>=$date2){
 								$tr .= "<tr>";
 								$tr.="<td ><input type=\"checkbox\" name=\"paid$x\" id=\"paid$x\" value=\"$arrClus[$x]\" onclick=\"submitThis('$ni','paid$x','ornum$x','datepaid$x','remarks$x')\"/></td>";
 								$tr.="<td >$arrClus[$x]</td>";	
@@ -86,7 +87,7 @@
 								$tr.="<td ><input type=\"text\" name=\"datepaid$x\" id=\"datepaid$x\" size=\"10\" /></td>";
 								$tr.="<td ><input type=\"text\" name=\"remarks$x\" id=\"remarks$x\" size=\"10\" /></td>";
 								$tr .= "<tr/>";
-							
+								}
 								}
 									
 								}

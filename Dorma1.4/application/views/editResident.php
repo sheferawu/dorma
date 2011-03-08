@@ -39,7 +39,7 @@
 									$bdayArray = explode("/", $bday);					
 							?>
 						
-							<select name="Month"  onchange="getMonth(this.options[this.selectedIndex].value)">
+							<select name="Month"  onchange="getMonth(this.options[this.selectedIndex].value,'Day','Year')">
 								<?php 
 									$bool="";
 									for($i=0;$i<12;$i++){
@@ -53,6 +53,7 @@
 										else if(trim($bdayArray[0]) ==  "apr") $bool[3]="selected=\"selected\"" ;
 										else if(trim($bdayArray[0]) == "may") $bool[4]="selected=\"selected\"" ;
 										else if(trim($bdayArray[0]) == "jun") $bool[5]="selected=\"selected\"" ;
+										else if(trim($bdayArray[0]) == "jul") $bool[6]="selected=\"selected\"" ;
 										else if(trim($bdayArray[0]) == "aug") $bool[7]="selected=\"selected\"" ;
 										else if(trim($bdayArray[0]) == "sep") $bool[8]="selected=\"selected\"" ;
 										else if(trim($bdayArray[0]) == "oct") $bool[9]="selected=\"selected\"" ;
@@ -93,7 +94,7 @@
 							</select>
 						</div>
 						</td>
-						<td class="error"></td>
+						<td class="error" id="bday"></td>
 					</tr>
 					
 					<tr class="r1">
@@ -203,10 +204,10 @@
 									$bool = "";
 						
 									$studNoArray = explode("-", $studNo);
-									$dateNow =  date("m/d/Y");
-									$dateNowArr = explode("/",$dateNow);
+									  $limit= strftime("%Y")+1;
+							
 									
-									for($i = 1950;$i<=$dateNowArr[2];$i++) {
+									for($i = 1950;$i<=$ilmit;$i++) {
 										$bool[$i] ="";
 										
 										if ($i == trim($studNoArray[0])) $bool[$i] ="selected=\"selected\"";
@@ -335,7 +336,9 @@
 					<tr class="r1">
 						<td>Home Address:</td>
 						<td>
-							<input type="text" name="HomeAddress" size="40" value='<?php if(isset($resident["Address"])) echo $resident["Address"];?>'>
+							<textarea name="HomeAddress" rows="4" cols="25">
+							<?php if(isset($resident["Address"])) echo $resident["Address"];?>
+							</textarea>
 						</td>
 						<td id="ad" class="error"></td>
 					</tr>
@@ -673,46 +676,149 @@
 							<tr>
 								<th>Appliance</th>
 								<th>Control #</th>
-								<th>Date Installed</th>
+								<th colspan="2">Date Installed</th>
 							</tr>
-							
+							<?php 
+							if($numApp>0){
+										
+									for($i=0;$i<$numApp;$i++){
+							?>
 							<tr>
 							
 								<td>
-									<select name="ApplianceName0" id="ApplianceName0" >
+									<?php
+									
+										echo "	<select name=\"ApplianceName$i\" id=\"ApplianceName$i\" >"
+									?>
+								
 										<?php 
+											if(isset($resident["AppName$i"])&&isset($appData)){
+											
+											$appArr = explode("*",$appData);
 											$bool="";
-											for($i=0;$i<4;$i++){
+											$num = count($appArr)+1;
+											for($j=0;$j<$num;$j++){
 												$bool[$i] ="";
 											}
-											if(isset($resident["AppName"])){
-											if(trim($resident["AppName"]) == "none") $bool[0] ="selected=\"selected\"";
-											else if(trim($resident["AppName"]) == "radio") $bool[1] ="selected=\"selected\"";
-											else if(trim($resident["AppName"]) == "ef") $bool[2] ="selected=\"selected\"";
-											else if(trim($resident["AppName"]) == "cw/p") $bool[3] ="selected=\"selected\"";
-											else if(trim($resident["AppName"]) == "cw/op") $bool[4] ="selected=\"selected\"";
+											$j = 0;
+											$appName = strtoupper(trim($resident["AppName$i"]));
+											foreach($appArr as $app){
+											if($appName == $app){ 
+												$bool[$j] ="selected=\"selected\"";
+												}
+												
+												echo "<option value = \"$app\" $bool[$j]>$app</option>"; 		
+												$j++; 
+											 }
 											}
-											echo "<option value = \"NONE\" $bool[0] >None</option>
-											<option value = \"RADIO\" $bool[1] >Radio</option>
-											<option value = \"EF\" $bool[2] >Electric Fan</option>
-											<option value = \"CW/P\" $bool[3] >Computer With Printer</option>
-											<option value = \"CW/OP\" $bool[4] >Computer With Out Printer</option>";
+											
+										echo "</select>";
+										?>
+									
+									
+								</td>
+								<td><?php 
+										$val = $resident["CTRLNum".$i];
+										echo "<input type=\"text\" name=\"controlNum$i\" id=\"controlNum$i\" size=\"7\"  value='$val'/>";
+									?>
+								</td>
+								<td>
+									<?php 
+										$date = $resident["DateInstalled".$i];
+										$dateArr =explode("/",$date) ;
+										echo "<select name =\"dateInstalledMonth$i\" id=\"dateInstalledMonth$i\" onchange=\"getMonth(this.options[this.selectedIndex].value,'dateInstalledDay$i','dateInstalledYear$i')\">";
+										echo "<option value=\"0\">M</option>";
+									
+										for($j =1;$j<=12;$j++){
+											if($j==$dateArr[0]){
+											echo "<option value=\"$j\" selected=\"selected\" >$j</option>";		
+												
+											}else{
+											echo "<option value=\"$j\">$j</option>";		
+											}
+										}
+									echo "</select>";
+									?>
+									
+									</td>
+									<td>
+									<?php 
+										echo "<div id=\"dateInstalledDay$i\">
+										<select name = \"dateInstalledDay$i\" >
+										<option value=\"$dateArr[1]\">$dateArr[1]</option>
+										</select>	
+										</div>";
+										
+									?> 
+									
+									</td>
+									
+									<td>
+									<?php 
+										echo "<div id=\"dateInstalledYear$i\">
+										<select name = \"dateInstalledYear$i\" >
+										<option value=\"$dateArr[2]\">$dateArr[2]</option>
+										</select>	
+										</div>";
+										
+									?> 
+									<?php 
+									echo "</tr></td>";
+									}
+									}else{
+										
+									?>	
+									<select name="ApplianceName0" id="ApplianceName0" > 
+									
+										<?php 
+										$arrApp  = explode("*",$appData);
+										foreach($arrApp as $aa){
+											 $aa= str_replace("'","",$aa);
+											echo "<option value = \"$aa\">$aa</option>";
+											
+										}
 										?>
 									</select>
 									
 								</td>
 								<td>
-									<input type="text" name="controlNum0" id="controlNum0" size="7"  value='<?php echo $resident["CTRLNum"];?>'/>
+									<input type="text" name="controlNum0" id="controlNum0" size="7"/>
 								</td>
 								<td>
-									<input type="text" name="dateInstalled0" id="dateInstalled0"  value='<?php echo $resident["DateInstalled"];?>'/>
-								</td>
-							</tr>
+									<!--<input type="text" name="dateInstalled0" id="dateInstalled0"/>
+									-->
+									<select name ="dateInstalledMonth0" id="dateInstalledMonth0" onchange="getMonth(this.options[this.selectedIndex].value,'dateInstalledDay0','dateInstalledYear0')">
+									<option value="0">M</option>
+									<?php 
+										for($i =1;$i<=12;$i++){
+											echo "<option value=\"$i\">$i</option>";		
+										}
+									?>
+									</select></td>
+									<td>
+									<div id="dateInstalledDay0">
+										<select name = "dateInstalledDay0" >
+										<option value="0">D</option>
+										</select>	
+									</div></td>
+									<td>
+									<div id="dateInstalledYear0">
+										<select name = "dateInstalledYear0">
+										<option value="0">Y</option>
+										</select>	
+									</div>
+										</td>
+										</tr>
+									<?php }?>
+							
 						</table>
 				
 				
-						<input type="button" value="Add Appliances" onclick="addApp()"/>
-						<input type="button" value="Remove Appliance" onclick="removeApp()"/>
+						<?php 
+						$appData = "'".$appData."'";
+						echo "<input type=\"button\" value=\"Add Appliances\" onclick=\"addApp('app',$appData)\"/>";
+						
+						?><input type="button" value="Remove Appliance" onclick="removeApp()"/>
 					</td>
 				</tr>			
 				
@@ -725,154 +831,231 @@
 			<h3 class="log_title" onclick="dropDown('log_info')">Log Info</h3>
 			<div class="log_info">
 				<table class="log_table">
-					<?php 
-						$bool="";
-						$form5="";
-						$room = "";
-						
-						for($i=0;$i<3;$i++){
-							$bool[$i] ="";
-							$form5[$i] = "";
-							$room[$i] = "";
-						}
-						
-						if(isset($resident["DateCheckIn"]))$checkin = $resident["DateCheckIn"];
-						if(isset($resident["FormFive"]))$form = $resident["FormFive"];
-						if(isset($resident["RoomNo"]))$roomNum = $resident["RoomNo"];
-						
-						if(trim($resident["Term"]) == "1"){
-							$bool[0]="value=\"$checkin\"";
-							$form5[0]="value=\"$form\"";
-							$room[0]="value=\"$roomNum\"";
-						}
-						else if(trim($resident["Term"]) == "2"){
-							$bool[1]="value=\"$checkin\"";
-							$form5[1]="value=\"$form\"";
-							$room[1]="value=\"$roomNum\"";
-						}
-						else if(trim($resident["Term"]) == "s"){
-							$bool[2]="value=\"$checkin\"";
-							$form5[2]="value=\"$form\"";
-							$room[2]="value=\"$roomNum\"";
-						}
-						
-					?>	
-				
 					<tr>
-						<?php 
-							echo "<td>Date Check-in:</td>
-							<td>1st <input type=\"text\" name=\"dateInSem1\" size=\"14\" $bool[0]/> </td>
-							<td>2nd <input type=\"text\" name=\"dateInSem2\" size=\"14\" $bool[1]/> </td>
-							<td>S <input type=\"text\"  name=\"dateInSemS\" size=\"14\" $bool[2]/> </td>";
-						
-							
-						?>
+						<td>Date Check-in</td>
+						<td>Date Check-out</td>
+						<td>Form 5</td>
+						<td>Room Number</td>
 					</tr>
 				
+					<tr>
+						<td> 
+							<select name="MonthLI1" id="MonthLI1" onchange="getMonth(this.options[this.selectedIndex].value,'DayLI1','YearLI1')">
+								<?php $bool="";
+									$cIn = $resident["DateCheckIn"];
+									$cInArray = explode("/", $cIn);	
+								
+									for($i=0;$i<12;$i++){
+										$bool[$i] ="";
+									}
+									
+
+										if(trim($cInArray[0]) == "1") $bool[0]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "2") $bool[1]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "3") $bool[2]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) ==  "4") $bool[3]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "5") $bool[4]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "6") $bool[5]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "7") $bool[6]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "8") $bool[7]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "9") $bool[8]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "10") $bool[9]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "11") $bool[10]="selected=\"selected\"" ;
+										else if(trim($cInArray[0]) == "12") $bool[11]="selected=\"selected\"" ;
+									
+									
+								?>							
+								<option value="0" >M</option>
+								
+										
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\"".$bool[$i-1].">$i</option>";
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayLI1">
+								<select name="DayLI1" >
+									<?php 
+									echo "<option value=\"$cInArray[1]\">$cInArray[1]</option>";					
+								?>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearLI1">
+								<select name="YearLI1">
+									<?php 
+									echo "<option value=\"$cInArray[2]\">$cInArray[2]</option>";					
+								?>
+								</select>
+							</div>
+						
+						</td>
+						<td> 
+							<select name="MonthLI2" id="MonthLI2" onchange="getMonth(this.options[this.selectedIndex].value,'DayLI2','YearLI2')">
+								
+								<?php $bool="";
+									$cOut = $resident["DateCheckOut"];
+									$cOutArray = explode("/", $cOut);	
+								
+									for($i=0;$i<12;$i++){
+										$bool[$i] ="";
+									}
+									
+
+										if(trim($cOutArray[0]) == "1") $bool[0]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "2") $bool[1]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "3") $bool[2]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) ==  "4") $bool[3]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "5") $bool[4]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "6") $bool[5]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "7") $bool[6]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "8") $bool[7]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "9") $bool[8]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "10") $bool[9]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "11") $bool[10]="selected=\"selected\"" ;
+										else if(trim($cOutArray[0]) == "12") $bool[11]="selected=\"selected\"" ;
+									
+									
+								?>
+																
+								<option value="0" >M</option>
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\"".$bool[$i-1].">$i</option>";
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayLI2">
+								<select name="DayLI2" >
+										<?php 
+									echo "<option value=\"$cOutArray[1]\">$cOutArray[1]</option>";					
+								?>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearLI2">
+								<select name="YearLI2">
+										<?php 
+									echo "<option value=\"$cOutArray[2]\">$cOutArray[2]</option>";					
+								?>
+								</select>
+							</div>
+						
+						</td>
+						<td><input type="text" name="form5" id="form5" size="14" value='<?php if(isset($resident["FormFive"])) echo $resident["FormFive"];?>'/></td>
+						<td><input type="text" name="room" id="room" size="14" value='<?php if(isset($resident["RoomNo"])) echo $resident["RoomNo"];?>'/></td>
+						
+					</tr>
 					<!--tr>
 						<td>Date Check-out:</td>
 						<td>1st <input type="text" name="dateOutSem1" size="14"/> </td>
 						<td>2nd <input type="text" name="dateOutSem2" size="14"/> </td>
 						<td>S <input type="text"  name="dateOutSemS" size="14"/> </td>
-					</tr-->
+					</tr>
 					
 					<tr>
 						<td>Form 5:</td>
-						<?php 
-							echo "<td>1st <input type=\"text\" name=\"formSem1\" size=\"14\" $form5[0]/> </td>
-							<td>2nd <input type=\"text\" name=\"formSem2\" size=\"14\" $form5[1]/> </td>
-							<td>S <input type=\"text\"  name=\"formSemS\" size=\"14\" $form5[2]/> </td>
-							
-							";
-						?>	
+						<td>1st <input type="text" name="formSem1" size="14"/> </td>
+						<td>2nd <input type="text" name="formSem2" size="14"/> </td>
+						<td>S <input type="text"  name="formSemS" size="14"/> </td>
 					</tr>
 					
 					<tr>
 						<td>Room No:</td>
-						<?php 
-							echo "<td>1st <input type=\"text\" name=\"roomSem1\" size=\"14\" $room[0]/> </td>
-							<td>2nd <input type=\"text\" name=\"roomSem2\" size=\"14\" $room[1]/> </td>
-							<td>S <input type=\"text\"  name=\"roomSemS\" size=\"14\" $room[2]/> </td>";
+						<td>1st <input type="text" name="roomSem1" size="14"/> </td>
+						<td>2nd <input type="text" name="roomSem2" size="14"/> </td>
+						<td>S <input type="text"  name="roomSemS" size="14"/> </td>
+					</tr-->
 						
-						?>
-					</tr>
 				</table>
 			</div>
 			
 			<h3 class="reservation_title" onclick="dropDown('reservation_info')">Reservation</h3>
 			<div class="reservation_info">
 				<table class="reservation_table">
-					<?php 
-						
-						$reserveornum="";
-						$reserveamount = "";
-						$remarks ="";
-						
-						for($i=0;$i<3;$i++){
-							$reserveornum[$i] ="";
-							$reserveamount[$i] = "";
-							$remarks[$i] = "";
-						}
-						$ro ="";
-						$ra ="";
-						$rr ="";
-						
-						if(isset($resident["ReserveOrnum"]))$ro = $resident["ReserveOrnum"];
-						if(isset($resident["ReserveAmount"]))$ra = $resident["ReserveAmount"];
-						if(isset($resident["ReserveRemarks"]))$rr = $resident["ReserveRemarks"];
-						
-						if(trim($resident["Sem"]) == "1"){
-							$reserveornum[0]="value=\"$ro\"";
-							$reserveamount[0]="value=\"$ra\"";
-							$remarks[0]="value=\"$rr\"";
-						}
-						else if(trim($resident["Sem"]) == "2"){
-							$reserveornum[1]="value=\"$ro\"";
-							$reserveamount[1]="value=\"$ra\"";
-							$remarks[1]="value=\"$rr\"";
-						}
-						else if(trim($resident["Sem"]) == "s"){
-							$reserveornum[2]="value=\"$ro\"";
-							$reserveamount[2]="value=\"$ra\"";
-							$remarks[2]="value=\"$rr\"";
-						}
-						
-					?>	
-				
 						<tr>
-							<td></td>
 							<th>OR #</th>
 							<th>Date</th>
 							<th>Amount</th>
 							<th>Remarks</th>
 						</tr>
-					<?php 
-						echo "
-						<tr>
-							<td>1</td>					
-							<td><input type=\"text\" name=\"OrNum1\" size=\"16\" $reserveornum[0]/></td>
-							<td><input type=\"text\" name=\"Date1\" size=\"16\"/> </td>
-							<td><input type=\"text\"  name=\"Amount1\" size=\"16\" $reserveamount[0]/> </td>
-							<td><input type=\"text\"  name=\"Remarks1\" size=\"15\" $remarks[0]/> </td>
-						</tr>
-						
-						<tr>
-							<td>2</td>
-							<td> <input type=\"text\" name=\"OrNum2\" size=\"16\" $reserveornum[1]/> </td>
-							<td> <input type=\"text\" name=\"Date2\" size=\"16\"/> </td>
-							<td> <input type=\"text\"  name=\"Amount2\" size=\"16\"/ $reserveamount[1]> </td>
-							<td> <input type=\"text\"  name=\"Remarks2\" size=\"15\" $remarks[1]/> </td>
-						</tr>
-		
-						<tr>
-							<td>S</td>
-							<td> <input type=\"text\" name=\"OrNumS\" size=\"16\" $reserveornum[2]/> </td>
-							<td> <input type=\"text\" name=\"DateS\" size=\"16\"/> </td>
-							<td> <input type=\"text\"  name=\"AmountS\" size=\"16\" $reserveamount[2]/> </td>
-							<td> <input type=\"text\"  name=\"RemarksS\" size=\"15\"  $remarks[2]/> </td>
-						</tr>
-						";
-					?>	
+							
+					<tr>					
+						<td><input type="text" name="OrNum" id="OrNum" size="16" value='<?php if(isset($resident["ReserveOrnum"])) echo $resident["ReserveOrnum"];?>'/></td>
+						<td>
+							<select name="MonthR" id="MonthR" onchange="getMonth(this.options[this.selectedIndex].value,'DayR','YearR')">
+								<?php $bool="";
+									$rDate = $resident["ReserveDate"];
+									$rDateArray = explode("/", $rDate);	
+								
+									for($i=0;$i<12;$i++){
+										$bool[$i] ="";
+									}
+									
+
+										if(trim($rDateArray[0]) == "1") $bool[0]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "2") $bool[1]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "3") $bool[2]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) ==  "4") $bool[3]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "5") $bool[4]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "6") $bool[5]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "7") $bool[6]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "8") $bool[7]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "9") $bool[8]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "10") $bool[9]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "11") $bool[10]="selected=\"selected\"" ;
+										else if(trim($rDateArray[0]) == "12") $bool[11]="selected=\"selected\"" ;
+									
+									
+								?>
+								
+								
+															
+								<option value="0" >M</option>
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\"".$bool[$i-1].">$i</option>";
+									
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayR">
+								<select name="DayR" >
+									<?php 
+									echo "<option value=\"$rDateArray[1]\">$rDateArray[1]</option>";					
+								?>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearR">
+								<select name="YearR">
+									<?php 
+									echo "<option value=\"$rDateArray[2]\">$rDateArray[2]</option>";					
+								?>
+								</select>
+							</div>
+						</td>
+						<td><input type="text" id="Amount" name="Amount" size="16" value='<?php if(isset($resident["ReserveAmount"])) echo $resident["ReserveAmount"];?>'/> </td>
+						<td><input type="text" id="Remarks" name="Remarks" size="15" value='<?php if(isset($resident["ReserveRemarks"])) echo $resident["ReserveRemarks"];?>'/> </td>
+					</tr>
+					
+					<!--tr>
+						<td>2</td>
+						<td> <input type="text" name="OrNum2" size="16"/> </td>
+						<td> <input type="text" name="Date2" size="16"/> </td>
+						<td> <input type="text"  name="Amount2" size="16"/> </td>
+						<td> <input type="text"  name="Remarks2" size="15"/> </td>
+					</tr>
+	
+					<tr>
+						<td>S</td>
+						<td> <input type="text" name="OrNumS" size="16"/> </td>
+						<td> <input type="text" name="DateS" size="16"/> </td>
+						<td> <input type="text"  name="AmountS" size="16"/> </td>
+						<td> <input type="text"  name="RemarksS" size="15"/> </td>
+					</tr-->
+				
 				</table>
 			</div>
 	
@@ -880,52 +1063,7 @@
 			<h3 class="key_title" onclick="dropDown('key_info')">Key</h3>
 			<div class="key_info">
 				<table class="key_table">
-					<?php 
-						
-						$keyor="";
-						$keyamount = "";
-						$datereceived ="";
-						$datereturned = "";
-						$keyremarks = "";
-						
-						for($i=0;$i<3;$i++){
-							$keyor[$i] ="";
-							$keyamount[$i] = "";
-							$datereceived[$i] = "";
-							$datereturned[$i] = "";
-							$keyremarks[$i] = "";
-						}
-						
-						if(isset($resident["KeyOrnum"]))$ro = $resident["KeyOrnum"];
-						if(isset($resident["KeyAmount"]))$ra = $resident["KeyAmount"];
-						if(isset($resident["DateReceived"]))$rr = $resident["DateReceived"];
-						if(isset($resident["DateReturned"]))$rrt = $resident["DateReturned"];
-						if(isset($resident["KeyRemarks"]))$rem = $resident["KeyRemarks"];
-						
-						if(trim($resident["KeyTerm"]) == "1"){
-							$keyor[0]="value=\"$ro\"";
-							$keyamount[0]="value=\"$ra\"";
-							$datereceived[0]="value=\"$rr\"";
-							$datereturned[0]="value=\"$rrt\"";
-							$keyremarks[0]="value=\"$rem\"";
-						}
-						else if(trim($resident["KeyTerm"]) == "2"){
-							$keyor[1]="value=\"$ro\"";
-							$keyamount[1]="value=\"$ra\"";
-							$datereceived[1]="value=\"$rr\"";
-							$datereturned[1]="value=\"$rrt\"";
-							$keyremarks[1]="value=\"$rem\"";
-						}
-						else if(trim($resident["KeyTerm"]) == "s"){
-							$keyor[2]="value=\"$ro\"";
-							$keyamount[2]="value=\"$ra\"";
-							$datereceived[2]="value=\"$rr\"";
-							$datereturned[2]="value=\"$rrt\"";
-							$keyremarks[2]="value=\"$rem\"";
-						}
-						
-						echo "<tr>
-							<td></td>
+						<tr>
 							<th>OR #</th>
 							<th>Amount</th>
 							<th>Date Received</th>
@@ -933,33 +1071,123 @@
 							<th>Remarks</th>
 						</tr>
 							
-					<tr>
-						<td>1</td>					
-						<td><input type=\"text\" name=\"OrNumKey1\" size=\"8\" $keyor[0]/> </td>
-						<td><input type=\"text\" name=\"AmountKey1\" size=\"12\" $keyamount[0]/> </td>
-						<td><input type=\"text\"  name=\"dateReceived1\" size=\"12\" $datereceived[0]/> </td>
-						<td><input type=\"text\"  name=\"dateReturned1\" size=\"12\"/ $datereturned[0]> </td>
-						<td> <input type=\"text\"  name=\"RemarksKey1\" size=\"10\" $keyremarks[0]/> </td>
+					<tr>			
+						<td><input type="text" name="OrNumKey" id="OrNumKey" size="8" value='<?php if(isset($resident["KeyOrnum"])) echo $resident["KeyOrnum"];?>'/> </td>
+						<td><input type="text" name="AmountKey" id="AmountKey" size="12" value='<?php if(isset($resident["KeyAmount"])) echo $resident["KeyAmount"];?>'/> </td>
+						<td><select name="MonthRec" id="MonthRec" onchange="getMonth(this.options[this.selectedIndex].value,'DayRec','YearRec')">
+								<?php $bool="";
+									$recDate = $resident["DateReceived"];
+									$recDateArray = explode("/", $recDate);	
+								
+									for($i=0;$i<12;$i++){
+										$bool[$i] ="";
+									}
+									
+
+										if(trim($recDateArray[0]) == "1") $bool[0]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "2") $bool[1]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "3") $bool[2]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) ==  "4") $bool[3]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "5") $bool[4]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "6") $bool[5]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "7") $bool[6]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "8") $bool[7]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "9") $bool[8]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "10") $bool[9]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "11") $bool[10]="selected=\"selected\"" ;
+										else if(trim($recDateArray[0]) == "12") $bool[11]="selected=\"selected\"" ;
+									
+									
+								?>								
+								<option value="0" >M</option>
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\"".$bool[$i-1].">$i</option>";
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayRec">
+								<select name="DayRec" >
+									<?php 
+									echo "<option value=\"$recDateArray[1]\">$recDateArray[1]</option>";					
+								?>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearRec">
+								<select name="YearRec">
+									<?php 
+									echo "<option value=\"$recDateArray[2]\">$recDateArray[2]</option>";					
+								?>
+								</select>
+							</div></td>
+						<td><select name="MonthRet" id="MonthRet" onchange="getMonth(this.options[this.selectedIndex].value,'DayRet','YearRet')">
+								<?php $bool="";
+									$retDate = $resident["DateReturned"];
+									$retDateArray = explode("/", $retDate);	
+								
+									for($i=0;$i<12;$i++){
+										$bool[$i] ="";
+									}
+									
+
+										if(trim($retDateArray[0]) == "1") $bool[0]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "2") $bool[1]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "3") $bool[2]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) ==  "4") $bool[3]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "5") $bool[4]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "6") $bool[5]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "7") $bool[6]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "8") $bool[7]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "9") $bool[8]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "10") $bool[9]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "11") $bool[10]="selected=\"selected\"" ;
+										else if(trim($retDateArray[0]) == "12") $bool[11]="selected=\"selected\"" ;
+									
+									
+								?>								
+								<option value="0" >M</option>
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\"".$bool[$i-1].">$i</option>";
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayRet">
+								<select name="DayRet" >
+									<?php 
+									echo "<option value=\"$retDateArray[1]\">$retDateArray[1]</option>";					
+								?>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearRet">
+								<select name="YearRet">
+									<?php 
+									echo "<option value=\"$retDateArray[2]\">$retDateArray[2]</option>";					
+								?>
+								</select>
+							</div></td>
+						<td> <input type="text"  name="RemarksKey" id="RemarksKey" size="10" value='<?php if(isset($resident["KeyOrnum"])) echo $resident["KeyRemarks"];?>'/> </td>
 					</tr>
 					
-					<tr>
+					<!--tr>
 						<td>2</td>
-						<td><input type=\"text\" name=\"OrNumKey2\" size=\"8\" $keyor[1]/> </td>
-						<td><input type=\"text\" name=\"AmountKey2\" size=\"12\"/  $keyamount[1]> </td>
-						<td><input type=\"text\"  name=\"dateReceived2\" size=\"12\"  $datereceived[1]/> </td>
-						<td><input type=\"text\"  name=\"dateReturned2\" size=\"12\" $datereturned[1]/> </td>
-						<td> <input type=\"text\"  name=\"RemarksKey2\" size=\"10\" $keyremarks[1]/> </td>
+						<td><input type="text" name="OrNumKey2" size="8"/> </td>
+						<td><input type="text" name="AmountKey2" size="12"/> </td>
+						<td><input type="text"  name="dateReceived2" size="12"/> </td>
+						<td><input type="text"  name="dateReturned2" size="12"/> </td>
+						<td> <input type="text"  name="RemarksKey2" size="10"/> </td>
 					</tr>
 	
 					<tr>
 						<td>S</td>
-						<td><input type=\"text\" name=\"OrNumKeyS\" size=\"8\" $keyor[2]/> </td>
-						<td><input type=\"text\" name=\"AmountKeyS\" size=\"12\"/  $keyamount[2]> </td>
-						<td><input type=\"text\"  name=\"dateReceivedS\" size=\"12\" $datereceived[2]/> </td>
-						<td><input type=\"text\"  name=\"dateReturnedS\" size=\"12\" $datereturned[2]/> </td>
-						<td> <input type=\"text\"  name=\"RemarksKeyS\" size=\"10\" $keyremarks[2]/> </td>
-					</tr>";
-				?>
+						<td><input type="text" name="OrNumKeyS" size="8"/> </td>
+						<td><input type="text" name="AmountKeyS" size="12"/> </td>
+						<td><input type="text"  name="dateReceivedS" size="12"/> </td>
+						<td><input type="text"  name="dateReturnedS" size="12"/> </td>
+						<td> <input type="text"  name="RemarksKeyS" size="10"/> </td>
+					</tr-->
 				
 				</table>
 			</div>

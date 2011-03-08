@@ -1,4 +1,8 @@
 <?php 
+unset($_SESSION['report_upper']);
+unset($_SESSION['apt']);
+unset($_SESSION['report_header']);
+unset($_SESSION['report_values']);
 if($residentWithAccounts!="NO RECORDS FOUND!"){
 if(isset($header)){
 $period = explode("/",$time);
@@ -19,16 +23,19 @@ switch($period[0]){
 }
 
 
+$_SESSION['report_upper'] = $header."$month $period[2]<br/></center>";
 echo $header."$month $period[2]<br/></center>";
 
 }else{
 	
 	if(isset($header1)){
-		
-		echo $header1;
+		$_SESSION['report_upper'] = $header1;
+	  	echo $header1;
 	}
 	
 }
+
+$_SESSION['report_header']=array("ST#","NAME","COLLEGE","COURSE","PERIOD COVERED","RESIDENT FEE","APP FEE","TOTAL"); 
 $table= "<table border =\"1\"><tr><th>ST#</th><th>NAME</th><th>COLLEGE</th><th>COURSE</th>
 <th>PERIOD COVERED</th><th>RESIDENT FEE</th><th>APP FEE</th><th>TOTAL</th></tr>";
 $residentFeeTotal = "0";
@@ -54,25 +61,33 @@ foreach($residentWithAccounts as $res){
 	$residentFeeTotal=$temp;
 	$temp = bcadd((string)$appFeeTotal,(string)$pay[2]);
 	$appFeeTotal=$temp;
-	
+	 $_SESSION['report_values'][$cnt][0]=$profile[1];
+	 $_SESSION['report_values'][$cnt][1]=$name;
+	 $_SESSION['report_values'][$cnt][2]=$profile[3];
+	 $_SESSION['report_values'][$cnt][3]=$profile[2];
+	 $_SESSION['report_values'][$cnt][4]=$pay[0];
+	 $_SESSION['report_values'][$cnt][5]=$pay[1];
+	 $_SESSION['report_values'][$cnt][6]=$pay[2];
+	 $_SESSION['report_values'][$cnt][7]=$pay[3];
 	$cnt++;
 }
 $table.="<tr>";
-
-for($cnt=0;$cnt<5;$cnt++){$table.="<td>";
-$table.="</td>";}
-
-
+$cnt1 = $cnt;
+for($cnt=0;$cnt<5;$cnt++){$table.="<td></td>";
+ $_SESSION['report_values'][$cnt1][$cnt]="\t";}
 
 $table.="<td>$residentFeeTotal</td>";
 $table.="<td>$appFeeTotal</td>";
 $sum =bcadd($residentFeeTotal,$appFeeTotal);
 $table.="<td>".$sum."</td>";
-
-
+ $_SESSION['report_values'][$cnt1][$cnt+1]=$residentFeeTotal;
+ $_SESSION['report_values'][$cnt1][$cnt+2]=$appFeeTotal;
+  $_SESSION['report_values'][$cnt1][$cnt+3]=$sum;
+ 
 $table.="</tr>";
 
 echo $table."</table>";
+echo "<br/><a class=\"genRepTxt\" href=\"index.php?c=option&m=excel&fn=residentreport$month$period[2]\">Click here to generate report</a>";
 }else{
 	
 	echo $residentWithAccounts;

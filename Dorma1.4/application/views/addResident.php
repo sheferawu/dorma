@@ -8,6 +8,7 @@
 	</head>
 	
 	<body>
+		
 		<form action="index.php?c=resident&m=getData" method="POST" name="residentForm"  onsubmit="return(validateForm(this))">
 			<h3 class="resident_title" onclick="dropDown('resident_info')">Resident's Information</h3>
 			<div class="resident_info">
@@ -33,7 +34,7 @@
 					<tr>
 						<td>Date of Birth:</td>
 						<td>
-							<select name="Month"  onchange="getMonth(this.options[this.selectedIndex].value)">
+							<select name="Month"  onchange="getMonth(this.options[this.selectedIndex].value,'Day','Year')">
 								<option value="0" >Month</option>
 								<option value="Jan"  >January</option>
 								<option value="Feb" >February</option>
@@ -60,7 +61,7 @@
 							</select>
 						</div>
 						</td>
-						<td class="error"></td>
+						<td class="error" id="bday"></td>
 					</tr>
 					
 					<tr class="r1">
@@ -118,7 +119,8 @@
 						<td>Student Number:</td>
 						<td><select name="Batch" onchange="setBatch(this.options[this.selectedIndex].value)">
 							<?php 
-							for($i = 1950;$i<=2012;$i++) {echo "<option value=\"$i\">$i</option>";}
+							  $limit= strftime("%Y")+1;
+							for($i = 1950;$i<=$limit;$i++) {echo "<option value=\"$i\">$i</option>";}
 								?>
 							</select>
 								- <input type="text" name="StudNumber" size="5"></td>
@@ -197,7 +199,7 @@
 					<tr class="r1">
 						<td>Home Address:</td>
 						<td>
-							<input type="text" name="HomeAddress" size="40">
+							<textarea name="HomeAddress" rows="4" cols="25"></textarea>
 						</td>
 						<td id="ad" class="error"></td>
 					</tr>
@@ -456,7 +458,7 @@
 			</table>
 		</div>
 		
-		<h3 class="appliance_title" onclick="dropDown('appliance_info')">Appliance</h3>
+				<h3 class="appliance_title" onclick="dropDown('appliance_info')">Appliance</h3>
 		<div class="appliance_info" id="appliance_info" >
 			<table class="addApp">		
 				<!--  	<td colspan="3"><input type="button" value="Load Appliances" id="loadApp" onclick='loadAppliances("index.php?c=resident&m=addAppliance")')/></td>
@@ -467,18 +469,22 @@
 							<tr>
 								<th>Appliance</th>
 								<th>Control #</th>
-								<th>Date Installed</th>
+								<th colspan ="3">Date Installed</th>
 							</tr>
 							
 							<tr>
 							
 								<td>
 									<select name="ApplianceName0" id="ApplianceName0" > 
-										<option value = "NONE">None</option>
-										<option value = "RADIO">Radio</option>
-										<option value = "EF">Electric Fan</option>
-										<option value = "CW/P">Computer With Printer</option>
-										<option value = "CW/OP">Computer With Out Printer</option>
+									
+										<?php 
+										$arrApp = explode("*",$app);
+										foreach($arrApp as $aa){
+											 $aa= str_replace("'","",$aa);
+											echo "<option value = \"$aa\">$aa</option>";
+											
+										}
+										?>
 									</select>
 									
 								</td>
@@ -486,14 +492,38 @@
 									<input type="text" name="controlNum0" id="controlNum0" size="7"/>
 								</td>
 								<td>
-									<input type="text" name="dateInstalled0" id="dateInstalled0"/>
+									<!--<input type="text" name="dateInstalled0" id="dateInstalled0"/>
+									-->
+									<select name ="dateInstalledMonth0" id="dateInstalledMonth0" onchange="getMonth(this.options[this.selectedIndex].value,'dateInstalledDay0','dateInstalledYear0')">
+									<option value="0">M</option>
+									<?php 
+										for($i =1;$i<=12;$i++){
+											echo "<option value=\"$i\">$i</option>";		
+										}
+									?>
+									</select></td>
+									<td>
+									<div id="dateInstalledDay0">
+										<select name = "dateInstalledDay0" >
+										<option value="0">D</option>
+										</select>	
+									</div></td>
+									<td>
+									<div id="dateInstalledYear0">
+										<select name = "dateInstalledYear0">
+										<option value="0">Y</option>
+										</select>	
+									</div>
 								</td>
 							</tr>
 						</table>
-				
-				
-						<input type="button" value="Add Appliances" onclick="addApp()"/>
-						<input type="button" value="Remove Appliance" onclick="removeApp()"/>
+					
+						<?php 
+						
+						echo "<input type=\"button\" value=\"Add Appliances\" onclick=\"addApp('app',$app)\"/>";
+						
+						?>
+						<input type="button" value="Remove Appliance" onclick="removeApp()" />
 					</td>
 				</tr>			
 				
@@ -507,18 +537,71 @@
 			<div class="log_info">
 				<table class="log_table">
 					<tr>
-						<td>Date Check-in:</td>
-						<td>1st <input type="text" name="dateInSem1" size="14"/> </td>
-						<td>2nd <input type="text" name="dateInSem2" size="14"/> </td>
-						<td>S <input type="text"  name="dateSInemS" size="14"/> </td>
+						<td>Date Check-in</td>
+						<td>Date Check-out</td>
+						<td>Form 5</td>
+						<td>Room Number</td>
 					</tr>
 				
+					<tr>
+						<td> 
+							<select name="MonthLI1" id="MonthLI1" onchange="getMonth(this.options[this.selectedIndex].value,'DayLI1','YearLI1')">
+																
+								<option value="0" >M</option>
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\" >$i</option>";
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayLI1">
+								<select name="DayLI1" >
+									<option value="">D</option>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearLI1">
+								<select name="YearLI1">
+									<option value="">Y</option>
+									<option value=""></option>
+								</select>
+							</div>
+						
+						</td>
+						<td> 
+							<select name="MonthLI2" id="MonthLI2"  onchange="getMonth(this.options[this.selectedIndex].value,'DayLI2','YearLI2')">
+																
+								<option value="0" >M</option>
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\" >$i</option>";
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayLI2">
+								<select name="DayLI2" >
+									<option value="">D</option>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearLI2">
+								<select name="YearLI2">
+									<option value="">Y</option>
+									<option value=""></option>
+								</select>
+							</div>
+						
+						</td>
+						<td><input type="text" name="form5" id="form5" size="14"/></td>
+						<td><input type="text" name="room" id="room" size="14"/></td>
+						
+					</tr>
 					<!--tr>
 						<td>Date Check-out:</td>
 						<td>1st <input type="text" name="dateOutSem1" size="14"/> </td>
 						<td>2nd <input type="text" name="dateOutSem2" size="14"/> </td>
 						<td>S <input type="text"  name="dateOutSemS" size="14"/> </td>
-					</tr-->
+					</tr>
 					
 					<tr>
 						<td>Form 5:</td>
@@ -532,7 +615,8 @@
 						<td>1st <input type="text" name="roomSem1" size="14"/> </td>
 						<td>2nd <input type="text" name="roomSem2" size="14"/> </td>
 						<td>S <input type="text"  name="roomSemS" size="14"/> </td>
-					</tr>
+					</tr-->
+						
 				</table>
 			</div>
 			
@@ -540,22 +624,42 @@
 			<div class="reservation_info">
 				<table class="reservation_table">
 						<tr>
-							<td></td>
 							<th>OR #</th>
 							<th>Date</th>
 							<th>Amount</th>
 							<th>Remarks</th>
 						</tr>
 							
-					<tr>
-						<td>1</td>					
-						<td><input type="text" name="OrNum1" size="16"/></td>
-						<td><input type="text" name="Date1" size="16"/> </td>
-						<td><input type="text"  name="Amount1" size="16"/> </td>
-						<td><input type="text"  name="Remarks1" size="15"/> </td>
+					<tr>					
+						<td><input type="text" name="OrNum" id="OrNum" size="16"/></td>
+						<td>
+							<select name="MonthR" id="MonthR" onchange="getMonth(this.options[this.selectedIndex].value,'DayR','YearR')">
+																
+								<option value="0" >M</option>
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\" >$i</option>";
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayR">
+								<select name="DayR" >
+									<option value="">D</option>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearR">
+								<select name="YearR">
+									<option value="">Y</option>
+									<option value=""></option>
+								</select>
+							</div>
+						</td>
+						<td><input type="text"  name="Amount" id="Amount" size="16"/> </td>
+						<td><input type="text"  name="Remarks" id="Remarks" size="15"/> </td>
 					</tr>
 					
-					<tr>
+					<!--tr>
 						<td>2</td>
 						<td> <input type="text" name="OrNum2" size="16"/> </td>
 						<td> <input type="text" name="Date2" size="16"/> </td>
@@ -569,7 +673,7 @@
 						<td> <input type="text" name="DateS" size="16"/> </td>
 						<td> <input type="text"  name="AmountS" size="16"/> </td>
 						<td> <input type="text"  name="RemarksS" size="15"/> </td>
-					</tr>
+					</tr-->
 				
 				</table>
 			</div>
@@ -579,7 +683,6 @@
 			<div class="key_info">
 				<table class="key_table">
 						<tr>
-							<td></td>
 							<th>OR #</th>
 							<th>Amount</th>
 							<th>Date Received</th>
@@ -587,16 +690,55 @@
 							<th>Remarks</th>
 						</tr>
 							
-					<tr>
-						<td>1</td>					
-						<td><input type="text" name="OrNumKey1" size="8"/> </td>
-						<td><input type="text" name="AmountKey1" size="12"/> </td>
-						<td><input type="text"  name="dateReceived1" size="12"/> </td>
-						<td><input type="text"  name="dateReturned1" size="12"/> </td>
-						<td> <input type="text"  name="RemarksKey1" size="10"/> </td>
+					<tr>			
+						<td><input type="text" name="OrNumKey" id="OrNumKey"  size="8"/> </td>
+						<td><input type="text" name="AmountKey" id="AmountKey" size="12"/> </td>
+						<td><select name="MonthRec" id="MonthRec" onchange="getMonth(this.options[this.selectedIndex].value,'DayRec','YearRec')">
+																
+								<option value="0" >M</option>
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\" >$i</option>";
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayRec">
+								<select name="DayRec" >
+									<option value="">D</option>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearRec">
+								<select name="YearRec">
+									<option value="">Y</option>
+									<option value=""></option>
+								</select>
+							</div></td>
+						<td><select name="MonthRet" id="MonthRet"  onchange="getMonth(this.options[this.selectedIndex].value,'DayRet','YearRet')">
+																
+								<option value="0" >M</option>
+								<?php 
+									for ($i = 1; $i <= 12; $i++){
+										echo "<option value=\"$i\" >$i</option>";
+									}
+								?>
+								
+							</select>
+							<div style="display:inline;" id = "DayRet">
+								<select name="DayRet">
+									<option value="">D</option>
+								</select>
+							</div>
+							<div style="display:inline;" id = "YearRet">
+								<select name="YearRet">
+									<option value="">Y</option>
+									<option value=""></option>
+								</select>
+							</div></td>
+						<td> <input type="text"  name="RemarksKey" id="RemarksKey" size="10"/> </td>
 					</tr>
 					
-					<tr>
+					<!--tr>
 						<td>2</td>
 						<td><input type="text" name="OrNumKey2" size="8"/> </td>
 						<td><input type="text" name="AmountKey2" size="12"/> </td>
@@ -612,7 +754,7 @@
 						<td><input type="text"  name="dateReceivedS" size="12"/> </td>
 						<td><input type="text"  name="dateReturnedS" size="12"/> </td>
 						<td> <input type="text"  name="RemarksKeyS" size="10"/> </td>
-					</tr>
+					</tr-->
 				
 				</table>
 			</div>
@@ -620,6 +762,7 @@
 			<table>
 				<tr>
 					<td colspan="3"><input type="submit" value="Submit" name="submitResident"/></td>
+				
 				</tr>
 			</table>
 			

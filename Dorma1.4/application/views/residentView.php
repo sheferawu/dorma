@@ -21,6 +21,7 @@ if (!isset($_SESSION['tally'])){
 	
 	
 }else{
+	if(isset($q[0])){
 	echo "
 		<h3 class=\"accomodation_title\" onclick=\"dropDown('accomodation_info')\">I. ACCOMODATION</h3>
 		<div class=\"accomodation_info\">
@@ -40,6 +41,9 @@ if (!isset($_SESSION['tally'])){
 	echo $q[0] + $q[1];
 	
 
+	$rmMale = $q[53] - $q[0];
+	$rmFemale = $q[54] - $q[1];
+	$rmTotal = $rmMale + $rmFemale;
 	
 	echo "</td>
 			</tr>
@@ -51,7 +55,17 @@ if (!isset($_SESSION['tally'])){
 		<h3 class=\"vacancy_title\" onclick=\"dropDown('vacancy_info')\">II. VACANCY</h3>
 		<div class=\"vacancy_info\">
 		<table class=\"tally\">
-		
+			<tr>
+				<th>Male</th>
+				<th>Female</th>
+				<th>Total</th>
+			</tr>
+			
+			<tr>
+				<td>$rmMale</td>
+				<td>$rmFemale</td>
+				<td>$rmTotal</td>
+			</tr>
 		</table>
 		</div>
 		
@@ -104,7 +118,7 @@ if (!isset($_SESSION['tally'])){
 			</tr>
 		</table>
 		</div>';
-			
+		
 	echo "
 		<br/>
 		<h3 class=\"college_title\" onclick=\"dropDown('college_info')\">IV. COLLEGE</h3>
@@ -305,10 +319,11 @@ if (!isset($_SESSION['tally'])){
 	</tr>
 	</table>
 	</div>";
-	
+	}else{echo "No Record Found";}
 	
 	unset($_SESSION['tally']);
-}
+
+} 
 
 
 
