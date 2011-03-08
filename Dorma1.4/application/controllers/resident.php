@@ -6,20 +6,47 @@ class Resident extends CI_Controller{
 		parent::__construct();
 		$this->load->helper("html");
 		$this->load->helper("url");
-		$this->load->library('MyClasses/OptionClass');
+		//$this->load->library('MyClasses/OptionClass');
 		$this->load->model('Residentmodel');
 		
-		
+		$this->load->model('Optionmodel');
 	}
 	function index(){
 				
 	
 	}
 	
-	function add(){
-		$this->load->view('addResident');
+	function editT(){
+   		$_SESSION["FirstNameT"] = $_GET["fname"];
+		$_SESSION["LastNameT"] = $_GET["lname"];
+		$_SESSION["MidNameT"] =$_GET["mname"];
+		
+   		$this->load->model("Optionmodel");
+		$data["arrTrans"] = $this->Residentmodel->editT($this->Optionmodel->returnFieldsArray("transient"),$_GET);
+		$this->load->view('editTransient',$data);
+		
 	}
+    function updateTransient(){
+   		$this->Residentmodel->updateTransient($_POST,$_SESSION["FirstNameT"],$_SESSION["MidNameT"],$_SESSION["LastNameT"]);
+   		$_SESSION["trans"] = "Transient Updated!";
+   }
+   
 	
+	function addStudent(){
+		$this->load->model('Dormmodel');
+		$data["app"] = $this->Dormmodel->getDormAppNames();
+		$this->load->view('addResident',$data);
+	}
+	function addTransient(){
+		$this->load->view('addTransient');
+	}
+	function searchGuarantor(){
+		
+		if(isset($_GET["str"])){
+			 $table= $this->Residentmodel->searchGuarantor($_GET["str"]);			
+			echo $table;		
+		}
+	}
 	function testEdit(){
 		$this->load->library('unit_test');
 		$this->unit->run($this->edit("CARLO LUIS","MARTINEZ","BATION"),"is_array",'Resident test 2 function: edit');//tama kasi ang sagot ay 27 at 27!=3
@@ -28,13 +55,19 @@ class Resident extends CI_Controller{
 	
 	function edit(){
 		if(isset($_GET["fname"]) && isset($_GET["lname"]) && isset($_GET["mname"])){
-		
+		$data["numApp"]= $this->Residentmodel->getNumApp($_GET["fname"],$_GET["mname"],$_GET["lname"]);
 		$data["resident"]= $this->Residentmodel->edit_resident($_GET["fname"],$_GET["lname"],$_GET["mname"]);
-		//print_r($result["Course	"]);	
-		$this->load->view('editResident',$data);}
+		//print_r($result["Course	"]);
+		$this->load->model('Dormmodel');	
+		$data["appData"] =str_replace("'","",$this->Dormmodel-> getDormAppNames());
+		//print_r($data["appData"]);
+		$this->load->view('editResident',$data);
+		}
 		// return $result;
 		//$this->load->view('editResident');
 	}
+
+	
 	function updateApp(){
 		
 		
@@ -54,7 +87,7 @@ class Resident extends CI_Controller{
 		if(isset($_SESSION["fname"]) && isset($_SESSION["lname"]) && isset($_SESSION["mname"])){
 			
 			if(isset($_POST['editResident'])){
-				$str = $this->Residentmodel->updateResident($_POST, $_SESSION["fname"],$_SESSION["lname"],$_SESSION["mname"]);
+				$str = $this->Residentmodel->updateResident($_POST, $_SESSION["fname"],$_SESSION["lname"],$_SESSION["mname"],$this->getNumApp());
 				$_SESSION["newResidentInfo"].= "Resident successfully edited!";
 			}
 			
@@ -66,7 +99,40 @@ class Resident extends CI_Controller{
 	function getData(){
 		//print_r($_POST);
 		if(isset($_POST['submitResident'])){
+		//$this->testGetData($_POST);
 		$str=$this->Residentmodel->add_entry($_POST);
+		$data['q'] = $str;
+		$this->load->view('homeView',$data);
+		$_SESSION["newResidentInfo"] =$str; 
+		redirect("home");
+		}
+	
+	}
+	/*
+	function testGetData($_POST){
+		
+	if(isset($_SESSION["numApp"])){
+	$numApp= $_SESSION["numApp"]-1;
+	if($numApp>0){
+		$cnt = 0;
+	
+		for($cnt=0;$cnt<$numApp;$cnt++){
+			
+			
+		$appName = $_POST["ApplianceName".$cnt];
+		
+		$_POST["dateInstalled".$cnt] = $_POST["dateInstalledMonth".$cnt]."/".$_POST["dateInstalledDay".$cnt]."/".$_POST["dateInstalledYear".$cnt];
+		
+		echo $_POST["dateInstalled".$cnt]."<br/>";
+		
+		}
+	}
+}
+	}*/
+	function getTransientData(){
+		//print_r($_POST);
+		if(isset($_POST['submitTransient'])){
+		$str=$this->Residentmodel->add_transientEntry($_POST);
 		//$data['q'] = $str;
 		//$this->load->view('homeView',$data);
 		$_SESSION["newResidentInfo"] =$str; 
@@ -83,19 +149,19 @@ class Resident extends CI_Controller{
 
 		if(isset($_GET["lname"])&&isset($_GET["fname"])&&isset($_GET["mname"])){
 
-		$opt = new OptionClass;
+		//$this->Optionmodel = new OptionClass;
 		$_SESSION["lNamePay"]=$lname = $_GET["lname"] ;
 		$_SESSION["fNamePay"]=$fname = $_GET["fname"] ;
 		$_SESSION["mNamePay"]=$mname = $_GET["mname"] ;
 
-		$arrcol = $opt->returnFieldsArray("resident");
-		$arrcol2 = $opt->returnFieldsArray("custodian");
+		$arrcol = $this->Optionmodel->returnFieldsArray("resident");
+		$arrcol2 = $this->Optionmodel->returnFieldsArray("custodian");
 		
-		$arrcol3 = $opt->returnFieldsArray("scholarship");
-		$arrcol4 = $opt->returnFieldsArray("honorsreceived");
-		$arrcol5 = $opt->returnFieldsArray("Hobbies");
-		$arrcol6 = $opt->returnFieldsArray("othersourcesincome");
-		$arrcol7 = $opt->returnFieldsArray("org");
+		$arrcol3 = $this->Optionmodel->returnFieldsArray("scholarship");
+		$arrcol4 = $this->Optionmodel->returnFieldsArray("honorsreceived");
+		$arrcol5 = $this->Optionmodel->returnFieldsArray("Hobbies");
+		$arrcol6 = $this->Optionmodel->returnFieldsArray("othersourcesincome");
+		$arrcol7 = $this->Optionmodel->returnFieldsArray("org");
 		
 		$str =  "";
 		$str.= $this->Residentmodel->view_entry("resident",$arrcol,$fname,$lname,$mname);
@@ -107,7 +173,27 @@ class Resident extends CI_Controller{
 		$this->load->view('residentView',$data);
 	
 	}
-}	
+}
+	function viewT(){
+	
+
+		if(isset($_GET["lname"])&&isset($_GET["fname"])&&isset($_GET["mname"])){
+
+		//$this->Optionmodel = new OptionClass;
+		$_SESSION["lNamePay"]=$lname = $_GET["lname"] ;
+		$_SESSION["fNamePay"]=$fname = $_GET["fname"] ;
+		$_SESSION["mNamePay"]=$mname = $_GET["mname"] ;
+
+		$arrcol = $this->Optionmodel->returnFieldsArray("Transient");
+		
+		$data["transInfo"] = $this->Residentmodel->view_entryT($arrcol,$fname,$lname,$mname); ;
+		
+		$this->load->view('transientView',$data);
+	
+	}
+}
+	
+
 	function delete(){
 	if(isset($_GET["lname"])&&isset($_GET["fname"])&&isset($_GET["mname"])){//this is the primary key of the table resident
 		$lname = $_GET["lname"] ;
@@ -118,7 +204,16 @@ class Resident extends CI_Controller{
 	}	
 		
 	}
-	
+	function deleteT(){
+	if(isset($_GET["lname"])&&isset($_GET["fname"])&&isset($_GET["mname"])){//this is the primary key of the table resident
+		$lname = $_GET["lname"] ;
+		$fname = $_GET["fname"] ;
+		$mname = $_GET["mname"] ;
+		$this->Residentmodel->delete_transient($fname,$lname,$mname);
+
+	}	
+		
+	}	
   	function setNumApp(){
   		
   		if(isset($_GET["numapp"])){
@@ -127,7 +222,16 @@ class Resident extends CI_Controller{
   			
   		}
   	}
-	function tally(){
+	function getNumApp(){
+  		
+  		if(isset($_SESSION["numApp"])){
+  			
+  			return $_SESSION["numApp"];
+  			
+  		}
+  		return 0;
+  	}
+  	function tally(){
 		$_SESSION['tally'] = 1;
 		
 		$data['q'] = $this->Residentmodel->tally_resident("1");

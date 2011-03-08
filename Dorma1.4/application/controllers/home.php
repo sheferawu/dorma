@@ -9,10 +9,40 @@ class Home extends CI_Controller{
 		
 	}
 	function index(){
+		$this->load->dbutil();
+		if(!$this->dbutil->database_exists('dormdatabase')){
+			redirect("c=home&m=begin");
+		}
+		if(isset($_SESSION['username'])){
+			$this->load->model('Dormmodel');
+			if($this->Dormmodel->checkSettings()<=0){
+				$_SESSION["setSettings"] = "Please fill up the settings form!"; 
+			}else{
+				if(isset($_SESSION["setSettings"])){
+					unset($_SESSION["setSettings"]);
+				}	
+				
+			} 
+			$this->load->view("homeView");
+		}else{
 		
-		$this->load->view("homeView");
+		$this->load->model("Startmodel");
+		$data["dn"] = $this->Startmodel->getDormNames();	
+		$this->load->view("login",$data);
+			
+		}
 	
 	}
+	function begin(){
+		$this->load->model("Startmodel");
+		
+		$this->Startmodel->start1();
+		redirect(''); 
+	}
+	function home(){
+		$this->load->view("homeView");
+	}
+	
 	function loadCss(){
 		echo "<style>";
 		$this->load->view("CSS/style.css");

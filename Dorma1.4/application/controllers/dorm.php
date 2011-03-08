@@ -9,68 +9,135 @@ class Dorm extends CI_Controller{
 		$this->load->helper("html");
 		$this->load->helper("url");
 		$dormName = "New Dorm"; //to be made dynamically in future releases 
-		$_SESSION["DORMNAME"] = $dormName; 
-		$_SESSION["monthlyRent"] = "650"; //magiging array sa future
-		$_SESSION["dailyRent"] = "21.7"; //magiging array sa future
-		$_SESSION["startDate"] ="11/03/2010";	
-		$_SESSION["endDate"] ="04/01/2011";	
-		$_SESSION["numberOfRooms"] =50;	
-		$_SESSION["maxResidentPerRoom"] =6;	
+		//$_SESSION["DORMNAME"] = $dormName; 
+	//	$_SESSION["monthlyRent"] = "650"; //magiging array sa future
+		//$_SESSION["dailyRent"] = "21.7"; //magiging array sa future
+		//$_SESSION["startDate"] ="11/03/2010";	
+		//$_SESSION["endDate"] ="04/01/2011";	
+		//$_SESSION["numberOfRooms"] =50;	
+	//	$_SESSION["maxResidentPerRoom"] =6;	
 		$this->load->model('Residentmodel');
 		$this->load->model('Dormmodel');
-		$_SESSION["term"] = "2";
-		$_SESSION["sy"] = "2010-2011";
-		$_SESSION["Dorma"] = "Cory M. Mariano";
-		$_SESSION["HousingHead"] = "ROWENA C. CARDENAS";
-		$_SESSION["HousingChief"] = "MARGARET M. CALDERON";
-		$_SESSION["Occupancy"] = 288;
+		
+		//$_SESSION["term"] = "2";
+		//$_SESSION["sy"] = "2010-2011";
+		//$_SESSION["Dorma"] = "Cory M. Mariano";
+		//$_SESSION["HousingHead"] = "ROWENA C. CARDENAS";
+		//$_SESSION["HousingChief"] = "MARGARET M. CALDERON";
+		//$_SESSION["Occupancy"] = 288;
+		//$_SESSION["uname"] = "";
 	}
 	
 	function index(){
 		
+		$this->load->view("homeView");
 	}
+	
+	function logout(){
+		$this->Dormmodel->logoutUser();
+	}	
+	
+	function setting(){
+		$data["dorm"]= $this->Dormmodel->edit_settings();
+		$data["dormApp"]= $this->Dormmodel->getDormApp();
+		
+		$this->load->view('dormSetting',$data);
+			
+	}
+	function saveSettings(){
+		$this->Dormmodel->saveSettings($_POST);
+		redirect('');
+	}
+	function setNumApp(){
+  		
+  		if(isset($_GET["numapp"])){
+  			
+  			$_SESSION["numAppSet"] = $_GET["numapp"];
+  			
+  		}
+  	}
+	function checkUser(){
+	
+		$enteredUserName = $_POST['username'];
+		$enteredPassword = $_POST['password'];
+		 $dormName= $_POST['dormname'];
+		$_SESSION["uname"] = $enteredUserName;
+		$_SESSION["dormname"] =$dormName;
+		
+		//$dorma = $this->getDorma();
+		//echo $dormName;
+		if($this->getManager($enteredUserName,$dormName)){
+			//$realPassword = $this->getPassword($dorma); 
+			if($this->getPassword($enteredPassword)){
+				$_SESSION["DATABASE"] = $this->Dormmodel->createDb($dormName);
+				$_SESSION['username'] = $enteredUserName;
+				$_SESSION['password'] = $enteredPassword;
+				
+				redirect('');
+			}else{
+				$_SESSION['message'] = "Passwords does not match. Try Again";
+				redirect('');
+			}
+		}else{
+			$_SESSION['message'] = "Username does not exist. Try Again";
+			redirect('');
+		}
+		
+		
+		
+		
+	}
+	function getPassword($pwd){
+		//sa hinaharap ay mag iif
+		$this->load->model('Startmodel');
+		return $this->Startmodel->getDormPassword($pwd);
+	}
+	
+	// returns 1 or 0
+	function getManager($uname,$dname){
+		$this->load->model('Startmodel');
+		return $this->Startmodel->getDormManager($uname,$dname);
+	}
+	
 	function getOccupancy(){
-		return $_SESSION["Occupancy"];
+		return $this->Dormmodel->getDormData('Occupancy');
 	}
 	function getHousingHead(){
-		return 	$_SESSION["HousingHead"];
+		$this->load->model('Startmodel');
+		return $this->Startmodel->getHousingData('HousingHead');
 	
 	}
 	function getHousingChief(){
-		return 	$_SESSION["HousingChief"];
+		$this->load->model('Startmodel');
+		return $this->Startmodel->getHousingData('HousingChief');
 	
 	}
 	function getDorma(){
-			return $_SESSION["Dorma"];
+		$this->load->model('Startmodel');
+		return $this->Startmodel->getDormData($this->Dormmodel->getDormData('Alias'),'Manager');
 	}
 	function getDormName(){
-			return $_SESSION["DORMNAME"];
+			return $this->Dormmodel->getDormData('DormName');
 	}
 	function getSY(){
-			return $_SESSION["sy"];
+			return $this->Dormmodel->getDormData('SchoolYear');
 	}
 	function getTerm(){
-			return $_SESSION["term"];
+			return $this->Dormmodel->getDormData('Term');
 	}
 	
-	function makeClusters(){
+	function makeClusters(){//gagawin pa ba ito?
 		
 	}
 	function getNumberOfRooms(){
-		return $_SESSION["numberOfRooms"];
+			return $this->Dormmodel->getDormData('NumberOfRooms');
 	}
 	
-	function setNumberOfRooms($newNum){
-		$_SESSION["numberOfRooms"] = $newNum;
-	}
 	function getMaxResidentPerRoom(){
-		return $_SESSION["maxResidentPerRoom"] ;	
+		return $this->Dormmodel->getDormData('MaxResidentPerRoom');
 		
 	}
-	function setMaxResidentPerRoom($newNum){
-		 $_SESSION["maxResidentPerRoom"]=$newNum;	
-		
-	}
+	
 	
 	
 	function testGetCluster(){//unit testing for the function getCluster of class Dorm
@@ -85,20 +152,24 @@ class Dorm extends CI_Controller{
 	}
 	function getCluster($num){//papainput sa kila dorma
 		$c="";	
-		$arr =$this->Dormmodel->getCluster("1",$num,"NewDorm");
-		switch($num){
-			case 1: $c  = $arr[0]; break;
-			case 2: $c  = $arr[1]; break;
-			case 3: $c  = $arr[2]; break;
-			case 4: $c  = $arr[3]; break;
-			case 5: $c  = $arr[4]; break;
+		$arr =$this->Dormmodel->getCluster("1",$num,$this->Dormmodel->getDormData('Alias'));
+		if($arr!=""){
+			$cnt = 1;
+			foreach($arr as $ar){
+			if($num==$cnt){
+			$c = $ar;
+			}
+			
+			$cnt++;
+			}
 		
 		}
+		
 	return $c;
 	}
 	
 	function getAllClusters(){
-			return  $this->Dormmodel->getCluster("1",5,"NewDorm");
+			return  $this->Dormmodel->getCluster("1",5,$this->Dormmodel->getDormData('Alias'));
 		
 	}
 	
@@ -117,6 +188,7 @@ class Dorm extends CI_Controller{
 		/* assumption na may limang cluster*/
 		for($i= 1;$i<=5;$i++){ //loop para malaman kung anong mga included na cluster ang dapat bayaran
 				$cluster= explode("-",$this->getCluster($i));//gawing array yung cluster na may format na mm1/dd1/yy1-mm2/dd2/yy2
+	if($cluster[0]!=""){
 				$e = explode("/",$cluster[1]); //kuhanin yung pangalawang bahagi ng cluster -> mm2/dd2/yy2
 			//ang mga if na ito ay tinitignan lang kung kasama si cluster sa dapat ng bayaran
 			if($d[2]>=$e[2]){//para sa taon
@@ -135,6 +207,7 @@ class Dorm extends CI_Controller{
 						}		
 					}
 				}
+		}else{break;}
 			}
 	return $includedClusters;
 	}
@@ -143,78 +216,54 @@ class Dorm extends CI_Controller{
 	function getMonthlyRent($dormname){
 		
 		//magkakaif sa future
-		
-		return $_SESSION["monthlyRent"];
+		return $this->Dormmodel->getDormData('MonthlyRent');
+	
 	}
 	
-	function setMonthlyRent($dormname,$newRent){
-		
-		//magkakaif sa future
-		
-		$_SESSION["monthlyRent"] = $newRent;
-	}
+	
 	
 	function getDailyRent($dormname){
 		
-		//magkakaif sa future
+		return $this->Dormmodel->getDormData('DailyRent');
 		
-		return $_SESSION["dailyRent"];
 	}
 	
-	function setDailyRent($dormname,$newRent){
+	function getTFUPRent($dormname){
 		
-		//magkakaif sa future
+		return $this->Dormmodel->getDormData('TFUP');
 		
-		$_SESSION["dailyRent"] = $newRent;
 	}
-
+	
+	function getTFNUPRent($dormname){
+		
+		return $this->Dormmodel->getDormData('TFNUP');
+		
+	}
+	
 	function getMonthlyApplianceFee($dormname,$appName){ //will make a database table for this in the future
 		$appName = trim(strtoupper($appName));
-		$fee = -1;
-		switch($appName){
-		
-			case "RADIO" : $fee = "18";break;
-			case "EF" : $fee = "46";break;
-			case "CW/P" : $fee = "71";break;
-			case "CW/OP" : $fee = "53";break;
-			
-		}
-		return $fee;
+		return $this->Dormmodel->getDormAppData($appName,'MonthlyRent');
 	}
 	
 	function getDailyApplianceFee($dormname,$appName){ //will make a database table for this in the future
 		$appName = trim(strtoupper($appName));
-		$fee = -1;
-		switch($appName){
+		return $this->Dormmodel->getDormAppData($appName,'DailyRent');
 		
-			case "RADIO" : $fee = "0.60"; break;
-			case "EF" : $fee = "1.55"; break;
-			case "CW/P" : $fee = "7.60"; break;
-			case "CW/OP" : $fee = "1.8"; break;
-			
-		}
-		return $fee;
 	}
 	
 	function getStartDate(){
+			return $this->Dormmodel->getDormData('StartDate');
 			
-			return $_SESSION["startDate"];
 	}
 	
-	function setStartDate($newStartDate){
-			
-			 $_SESSION["startDate"] = $newStartDate;
-	}
+
 	
 	function getEndDate(){
 			
-			return $_SESSION["endDate"];
+			return $this->Dormmodel->getDormData('EndDate');
 	}
 	
-	function setEndDate($newEndDate){
-			
-			 $_SESSION["endDate"] = $newEndDate;
-	}
+	
 	
 	
  	function deletepay(){
@@ -230,20 +279,25 @@ class Dorm extends CI_Controller{
 	
 	function pay(){
 		if(isset($_SESSION["lNamePay"])&&isset($_SESSION["fNamePay"])&&isset($_SESSION["mNamePay"])){
+			 $data["checkIn"]= $this->Residentmodel->getDateCheckIn($_SESSION["fNamePay"],$_SESSION["mNamePay"],$_SESSION["lNamePay"]);
+			if($data["checkIn"]!=""){
 			$clusters=$this->getAllClusters();
 			$paid = $this->Dormmodel->getPaidPeriods($_SESSION["fNamePay"],$_SESSION["lNamePay"],$_SESSION["mNamePay"]);
 			$data["arrClus"] = $this->Dormmodel->getMissedPeriods($paid,$clusters);
 			//$data["paid"] = $paid; 
+			
 			$data["sy"] = $this->getSY();
 			$this->load->view("recordOfPayment",$data);
-			
+			}else{
+			echo "<br/>Resident Has no Log-in Information<br/>";
+			}
 		}
 	}
 	
 	function getpay(){
 		if(isset($_SESSION["lNamePay"])&&isset($_SESSION["fNamePay"])&&isset($_SESSION["mNamePay"])){
-		 
-			$pc = explode("-",$_GET["periodcovered"]);
+		 	
+		 	$pc = explode("-",$_GET["periodcovered"]);
 			$start = $pc[0];
 			$end = $pc[1];
 			$term = $_SESSION["term"];
@@ -255,6 +309,7 @@ class Dorm extends CI_Controller{
 			//if($bool){
 			$this->listResidentsWithAccount("",3);
 			//}
+			
 		
 		}	
 	}
@@ -321,6 +376,47 @@ class Dorm extends CI_Controller{
 			$residentFee =bcadd($dayFee,$monthFee);
 			
  		return	$residentFee;
+		}
+		}
+		return "0";
+		
+ 	}
+ 	
+	function getTransientFee($name,$start,$end){
+			
+			$fullName = explode("@",$name);
+			$checkin = $this->Residentmodel->getDateCheckIn($fullName[1],$fullName[2],$fullName[0]);
+			$rate = $this->Residentmodel->getTransientRate($fullName[1],$fullName[2],$fullName[0]);
+			if($checkin!=""){
+			
+			$ci=explode("/",str_replace("@","",$checkin));
+			$st=explode("/",str_replace("@","",$start));
+			$en=explode("/",str_replace("@","", $end));
+			
+			$transientFee = 0;
+			$dt = date_create($ci[2]."-".$ci[0]."-".$ci[1]);
+			$datetime1 = date_create($st[2]."-".$st[0]."-".$st[1]);
+			$datetime2 = date_create($en[2]."-".$en[0]."-".$en[1]);
+		
+		if($dt<=$datetime2){
+			if($dt>$datetime1){$datetime1 = $dt;}
+		
+			$datetime2->add(new DateInterval('P1D'));
+			$interval = date_diff($datetime2, $datetime1);
+			
+			if (trim(strtoupper($rate)) == "UP")
+				$l1 = ($this->getTFUPRent("NewDorm"));
+			else if (trim(strtoupper($rate)) == "NON-UP")
+				$l1 = ($this->getTFNUPRent("NewDorm"));
+			
+			bcscale(2);
+			$d = $interval->format('%d');
+			$dayFee=bcmul($l ,(string)($d));
+		
+			
+			$transientFee = $dayFee;
+			
+ 		return	$transientFee;
 		}
 		}
 		return "0";
@@ -395,7 +491,8 @@ class Dorm extends CI_Controller{
 	
 	
 	function residentsWithAccount(){
-		$header=  "<center>New Residence Hall<br/>";
+		$dorm = ucwords($this->getDormName());
+		$header=  "<center>$dorm<br/>";
 		$header.= "Student Housing Division<br/>";
 		$header.= "UPLB Housing Division<br/>";
 		$header.= "Student College, Laguna<br/>";
@@ -403,6 +500,18 @@ class Dorm extends CI_Controller{
 		$this->listResidentsWithAccount($header,0);
 	
 	}
+	
+	function transientsWithAccount(){
+		$dorm = ucwords($this->getDormName());
+		$header=  "<center>$dorm<br/>";
+		$header.= "Student Housing Division<br/>";
+		$header.= "UPLB Housing Division<br/>";
+		$header.= "Student College, Laguna<br/>";
+		$header.= "List of Transients with account for ";
+		$this->listTransientsWithAccount($header,0);
+	
+	}
+	
 	function accountsReceivable(){
 	$header = "<center>ACCOUNTS RECEIVABLE FROM PREVIOUS RESIDENTS</center></br>";	
 	$data["header"] = $header; 
@@ -411,13 +520,17 @@ class Dorm extends CI_Controller{
 	}
 	function listResidentsWithAccount($header,$mode){
 		
-		$numPeriodsArr= $this->checkIfItsTimeToPay();
+		$numPeriodsArr= $this->checkIfItsTimeToPay();//get the number of included cluster for this month
+		
 		$cnt = 0;
 		$periodsArr ="" ;
-		foreach($numPeriodsArr as $a){$periodsArr[$cnt++] =$this-> getCluster($a);}
+		if($numPeriodsArr!=""){
+		foreach($numPeriodsArr as $a){$periodsArr[$cnt++] =$this-> getCluster($a);} //get all of the clusters
 		$recordOfPayment= $this->Dormmodel->getPaymentPeriods($periodsArr);
+		
 		if($recordOfPayment!=""){
 		ksort($recordOfPayment);
+		
 		$kList= array_keys($recordOfPayment);
 		$cnt = 0;
 		$residentWithAccounts="";
@@ -427,10 +540,12 @@ class Dorm extends CI_Controller{
 				$appFee = 0;
 				$qList = explode("/",$kList[$cnt]);
 				$rp = explode(" ",$r);
+			
+				
 				$start = explode("-",$rp[0]);
 				$end = explode("-",$rp[count($rp)-1]);
 			    $residentFee=$this->getResidentFee($qList[0],$start[0],$end[1]);
-				
+			
 			    $appFee=$this->getApplianceFee($qList[0],$start[0],$end[1]);
 				
 				bcscale(2);
@@ -453,7 +568,7 @@ class Dorm extends CI_Controller{
 		}else{
 		$data['header1'] =$header;
 		
-		}
+		}	
 		$data['residentWithAccounts'] =$residentWithAccounts;
 	
 		$this->load->view('residentWithAccounts',$data);
@@ -463,15 +578,19 @@ class Dorm extends CI_Controller{
 	
 		$this->load->view('residentWithAccounts',$data);
 		}
+	}else{echo "No record!";}
 	}
-	function pdf()
-	{
-     $this->load->helper('to_pdf');
-     // page info here, db calls, etc.    
-     $data["n"]="no"; 
-     $html = $this->load->view('addResident', $data, true);
-     pdf_create($html, 'filename');
-}
+	
+	function listTransientsWithAccount($header,$mode){
+		
+		$data["header"] = $header;
+		
+		$data["transRec"]= $this->Dormmodel->getTransientPaymentPeriods();
+		$data['time'] = date("m/d/Y");
+		$this->load->view("transientWithAccounts",$data);
+		
+		
+	}
 	
 	function applianceReport(){
 		 $arrOfAppRec= $this->Residentmodel->getAppRecords();
@@ -505,21 +624,36 @@ class Dorm extends CI_Controller{
 		 $data["accCol"] = $accCol;
 		 $data["accRe"]  = $this->Residentmodel->getAccountReceivable($month);
 		 $data["prevAccRe"] = $this->Residentmodel->getPrevAccountReceivable($month);
-		 		$data["table6"] 	  = $this->Dormmodel->view_workload();
-		 //print_r($data["prevAccRe"]);
-		 //print_r($accCol);
+		 $data["table6"] 	 = $this->Dormmodel->view_workload();
+		
+		 $data["transData"]=$this->Dormmodel->setTransTable($month);
 		 $this->load->view("accomplishReport",$data);
 	}
-function addProject(){
+	
+	function addProject(){
 		$this->load->view('NewWorkload');
 	}
-function getWorkload(){
+	function getWorkload(){
 		if(isset($_POST['workload'])){
 			$str=$this->Dormmodel->add_workload($_POST);
 			$str = "New workload added!<br/>";
 			$_SESSION["newResidentInfo"].=$str; 
 			redirect("home");
 		}
+	}
+	
+	function updateWorkload(){
+		if(isset($_POST['editWorkload'])){
+			$str=$this->Dormmodel->update_workload($_POST);
+			$str = "Workload successfully edited!<br/>";
+			$_SESSION["newResidentInfo"].=$str; 
+			redirect("home");
+		}
+	}
+	
+	function editWorkload(){
+		$data["projects"] = $this->Dormmodel->edit_workload();
+		$this->load->view("EditWorkload", $data);
 	}
 	
 	function viewWorkload(){
