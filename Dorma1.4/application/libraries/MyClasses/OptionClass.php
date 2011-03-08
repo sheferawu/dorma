@@ -1,19 +1,14 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
-class OptionClass {
+class OptionClass extends CI_Model {
+	 var $db_group_name2 = "dorm";
 	
-	function returnTotalCnt($ret){
-		$tcnt = 0;	
-			while(($row = mysql_fetch_array($ret))){
-					$tcnt++;
-					if($tcnt>90) break;	
-			}
-		return $tcnt;
-	}
 	
 	function returnTableLink($ret,$len,$page){
 			$tableStr = "";
 			//$totalCnt = $this->returnTotalCnt($ret);
-			$totalCnt=mysql_num_rows($ret);
+			//$totalCnt=mysql_num_rows($ret);
+			$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+	        $totalCnt=$this->{$this->db_group_name2}->count_all_results($ret);
 			//if($totalCnt>0){
 			$tableStr.="<table width= \"$len\" >";
 			$allowed = 5;
@@ -23,7 +18,7 @@ class OptionClass {
 			//$numOfPage = 2;
 			$pcnt = 0;
 			$cnt1 = $start;
-		while(($row = mysql_fetch_array($ret))){
+		foreach($ret as $row){
 			$fname = ($row["FirstName"]);
 			$lname = ($row["LastName"]);
 			$mname = ($row["MidName"]);
@@ -72,8 +67,8 @@ class OptionClass {
 		$facnt = count($fa);
 		$stracnt = count($stra);
 		$arr = "";
-		$tableStr.="<table width= \"$len\" bgcolor=\"white\">";
-			while(($row = mysql_fetch_array($ret))){
+		$tableStr.="<table width= \"$len\" bgcolor=\"white\" id =\"auto\">";
+			foreach($ret as $row){
 							$cnt4 =0;
 							$arr = "";
 							
@@ -122,21 +117,24 @@ class OptionClass {
 	}
 	function returnFieldsArray($tableName){//not refactored 
 	
-		$con = mysql_connect("localhost","DORMA","dorm")or die("Can't connect");
+		//$con = mysql_connect("localhost","DORMA","dorm")or die("Can't connect");
 		
-		mysql_select_db("dormdatabase",$con) or die("Can't select database");
-		
+		//mysql_select_db("dormdatabase",$con) or die("Can't select database");
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+ 
 
-			$qFieldNames = mysql_query("SHOW COLUMNS FROM $tableName",$con) or die("Can't find fields' name"); //get the columns from the table resident Example : FirstName, MiddleName etc 
-			$numFields = mysql_num_rows($qFieldNames); 
-			$cnt = 0; 
-				while ($cnt < $numFields){ 
-    					$fieldName = mysql_fetch_row($qFieldNames); 
-    					$fields[$cnt++] = $fieldName[0]; 
+			//$qFieldNames = mysql_query("SHOW COLUMNS FROM $tableName",$con) or die("Can't find fields' name"); //get the columns from the table resident Example : FirstName, MiddleName etc 
+			//$qFieldNames = $this->{$this->db_group_name2}->query("SHOW COLUMNS FROM $tableName"); //get the columns from the table resident Example : FirstName, MiddleName etc 
+			return $qFieldNames = $this->{$this->db_group_name2}->list_fields($tableName);
+			//$numFields = count($qFieldNames); 
+			//$cnt = 0; 
+				//while ($cnt < $numFields){ 
+    					//$fieldName = mysql_fetch_row($qFieldNames); 
+    					//$fields[$cnt++] = $fieldName[0]; 
     	
-					} 
+					//} 
 		
-		return $fields;
+		//return $fields;
 	}
 
 	
