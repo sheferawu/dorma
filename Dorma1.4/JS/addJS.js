@@ -25,10 +25,244 @@ function resetError(applianceForm)
 		document.getElementById("fan_instS").style.background = "";	
 	
  }
- 
+
+function validateEditWorkloadForm(form){
+	var proceed = true;
+	var table = document.getElementById('workList'),rows;
+	
+	with(form){
+		
+		if(table && (rows = table.rows)) {
+			for(var i = 0, n = rows.length - 1; i < n; i++) {
+				specWork = eval("specWork".concat(i));
+				manpower = eval("manpower".concat(i));
+				stat = eval("status".concat(i));
+				startMonth = eval("startMonth".concat(i));
+				compMonth = eval("compMonth".concat(i));
+				remarks = eval("remarks".concat(i));
+				
+				if (specWork.value.trim().toUpperCase() != "" && specWork.value.trim().length <= 20)
+					document.getElementById("specWork".concat(i)).style.background="white";
+				else{
+					document.getElementById("specWork".concat(i)).style.background="#FCBBBB";
+					proceed = false;
+				}
+				
+				if (manpower.value.trim().toUpperCase() != "" && manpower.value.trim().length <= 100)
+					document.getElementById("manpower".concat(i)).style.background="white";
+				else{
+					document.getElementById("manpower".concat(i)).style.background="#FCBBBB";
+					proceed = false;
+				}
+				
+				if (stat.value.trim() != "" && stat.value.length <= 128)
+					document.getElementById("status".concat(i)).style.background="white";
+				else
+				{
+					document.getElementById("status".concat(i)).style.background="#FCBBBB";
+					proceed = false;
+				}
+				
+				if (startMonth.value != "0")	{
+					document.getElementById("startMonth".concat(i)).style.color="black";
+				
+				}else
+				{
+					document.getElementById("startMonth".concat(i)).style.color ="red";
+					proceed = false;
+				}
+				
+				if (remarks.value.length <= 20)
+					document.getElementById("remarks".concat(i)).style.background="white";
+				else
+				{
+					document.getElementById("remarks".concat(i)).style.background="#FCBBBB";
+					proceed = false;
+				}
+				
+			}
+		}
+	}
+	
+	return proceed;
+}
+
+function validateWorkloadForm(projectForm){
+	var proceed = true;
+	
+	with(projectForm){
+		if (specWork.value.trim() != "" && specWork.value.length <= 20)
+			document.getElementById("specWork").style.background="white";
+		else
+		{
+			document.getElementById("specWork").style.background="#FCBBBB";
+			proceed = false;
+		}
+		
+		if (manpower.value.trim() != "" && manpower.value.length <= 100)
+			document.getElementById("manpower").style.background="white";
+		else
+		{
+			document.getElementById("manpower").style.background="#FCBBBB";
+			proceed = false;
+		}
+		
+		if (status.value.trim() != "" && status.value.length <= 128)
+			document.getElementById("status").style.background="white";
+		else
+		{
+			document.getElementById("status").style.background="#FCBBBB";
+			proceed = false;
+		}
+		
+		if (startMonth.value != "0")	{
+			document.getElementById("startMonth").style.color="black";
+		
+		}else
+		{
+			document.getElementById("startMonth").style.color ="salmon";
+			proceed = false;
+		}
+		
+	}
+	
+	return proceed;
+}
+
+ function validateTransForm(transientForm){
+	var proceed = true;
+		
+	with(transientForm){
+		if (ControlNum.value.trim() != "" && ControlNum.value.length <= 20)
+			cno.innerHTML = "";
+		else
+		{
+			cno.innerHTML = "Invalid cntrol number";
+			proceed = false;
+		}
+		
+		if (Date.value.trim() != "" && Date.value.length <= 20)
+			date.innerHTML = "";
+		else
+		{
+			date.innerHTML = "Invalid date";
+			proceed = false;
+		}
+		
+		if (lastname.value.trim() != "" && lastname.value.length <= 30)
+			ln.innerHTML = "";
+		else
+		{
+			ln.innerHTML = "Invalid last name";
+			proceed = false;
+		}
+		
+		if (firstname.value.trim() != "" && firstname.value.length <= 50)
+			fn.innerHTML = "";
+		else
+		{
+			fn.innerHTML = "Invalid first name";
+			proceed = false;
+		}
+		
+		if (middlename.value.trim() != "" && middlename.value.length <= 30)
+			mn.innerHTML = "";
+		else
+		{
+			mn.innerHTML = "Invalid middle name";
+			proceed = false;
+		}
+		
+		if (purpose.value.length <= 100)
+			purpose.innerHTML = "";
+		else
+		{
+			purpose.innerHTML = "Purpose too long";
+			proceed = false;
+		}
+		
+		if (Emergency.value.length <= 60)
+			emergency.innerHTML = "";
+		else
+		{
+			emergency.innerHTML = "Name too long";
+			proceed = false;
+		}
+		
+		if (dormName.value.trim() != "" && dormName.value.length <= 60)
+			dorm.innerHTML = "";
+		else
+		{
+			dorm.innerHTML = "Invalid dorm name";
+			proceed = false;
+		}
+		
+		if (tcheckin.value.length <= 20)
+			tin.innerHTML = "";
+		else
+		{
+			tin.innerHTML = "Invalid time";
+			proceed = false;
+		}
+		
+		if (tcheckout.value.length <= 20)
+			tout.innerHTML = "";
+		else
+		{
+			tout.innerHTML = "Invalid time";
+			proceed = false;
+		}
+		
+		if (roomassign.value.trim() != "" && roomassign.value.length <= 10)
+			room.innerHTML = "";
+		else
+		{
+			room.innerHTML = "Room number";
+			proceed = false;
+		}
+		
+		if (amount.value.trim() != "" && amount.value.length <= 30 && !isNan(amount.value.trim()))
+			amnt.innerHTML = "";
+		else
+		{
+			amnt.innerHTML = "Invalid amount";
+			proceed = false;
+		}
+		
+		if (ornum.value.trim() != "" && ornum.value.length <= 10)
+			or.innerHTML = "";
+		else
+		{
+			or.innerHTML = "OR number";
+			proceed = false;
+		}
+		
+		if (guarantor.value.length <= 120)
+			grt.innerHTML = "";
+		else
+		{
+			grt.innerHTML = "Invalid Name";
+			proceed = false;
+		}
+		if(document.getElementById("nrf")){
+			grt.innerHTML = "Invalid Name";
+			proceed = false;
+		
+		}
+		return proceed;
+	}	
+}
+
 function validateForm(residentForm)
 {	
 	var proceed = true;
+	
+	var table = document.getElementById('app'),rows;
+	var row = "";
+	var cnum = "";
+	var date = "";
+	
+	
 	var tbl = document.getElementById('app');
 	
 	var lastRow = tbl.rows.length;
@@ -45,6 +279,7 @@ function validateForm(residentForm)
 	
 	with(residentForm)
 	{
+		
 		if (lastname.value.trim() != "" && lastname.value.length <= 15)
 			ln.innerHTML = "";
 		else
@@ -60,6 +295,15 @@ function validateForm(residentForm)
 			fn.innerHTML = "Invalid first name";
 			proceed = false;
 		}
+
+		if (Month.value.trim().toUpperCase() != "0")
+			bday.innerHTML = "";
+		else
+		{
+			bday.innerHTML = "Please select a month";
+			proceed = false;
+		}
+		
 		
 		if (middlename.value.trim() != "" && middlename.value.length <= 15)
 			mn.innerHTML = "";
@@ -69,7 +313,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if (lastSchoolAttended.value.trim() != "" && lastSchoolAttended.value.length <= 50)
+		if (/*lastSchoolAttended.value.trim() != "" &&*/lastSchoolAttended.value.length <= 50)
 			lsa.innerHTML = "";
 		else
 		{
@@ -101,7 +345,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if (!isNaN(MonthlyStipend.value))
+		if (!isNaN(MonthlyStipend.value) && MonthlyStipend.value.length <= 6)
 			stipend.innerHTML = "";
 		else
 		{
@@ -117,7 +361,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if (HomeAddress.value.trim() != "" && HomeAddress.value.length <= 50)
+		if (HomeAddress.value.trim() != "" && HomeAddress.value.length <= 200)
 			ad.innerHTML = "";
 		else
 		{
@@ -125,7 +369,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if (TelephoneNumber.value.length != 15 && !isNaN(TelephoneNumber.value))
+		if (TelephoneNumber.value.length <= 15)
 			tel.innerHTML = "";
 		else
 		{
@@ -147,16 +391,8 @@ function validateForm(residentForm)
 		}
 		else
 			mail.innerHTML = "";
-
-		if (HomeAddress.value.trim() != "" && HomeAddress.value.length <= 50)
-			ad.innerHTML = "";
-		else
-		{
-			ad.innerHTML = "Invalid address";
-			proceed = false;
-		}
 		
-		if (NumBrothers.value.trim() != "" && !isNaN(NumBrothers.value))
+		if (!isNaN(NumBrothers.value))
 			bro.innerHTML = "";
 		else
 		{
@@ -164,7 +400,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if (NumSisters.value.trim() != "" && !isNaN(NumSisters.value))
+		if (!isNaN(NumSisters.value))
 			sis.innerHTML = "";
 		else
 		{
@@ -172,7 +408,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if (BirthOrder.value.trim() != "" && BirthOrder.value.length <= 15)
+		if (BirthOrder.value.length <= 15)
 			bor.innerHTML = "";
 		else
 		{
@@ -236,7 +472,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if (cg1add.value.length <= 50)
+		if (cg1add.value.length <= 100)
 			cg1add.innerHTML = "";
 		else
 		{
@@ -252,7 +488,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if (cg2add.value.length <= 50)
+		if (cg2add.value.length <= 100)
 			cg2add.innerHTML = "";
 		else
 		{
@@ -276,7 +512,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if ( cfadd.value.length <= 50)
+		if ( cfadd.value.length <= 100)
 			cfa.innerHTML = "";
 		else
 		{
@@ -316,7 +552,7 @@ function validateForm(residentForm)
 			proceed = false;
 		}
 		
-		if (cmadd.value.length <= 50)
+		if (cmadd.value.length <= 100)
 			cma.innerHTML = "";
 		else
 		{
@@ -339,13 +575,286 @@ function validateForm(residentForm)
 			cmi.innerHTML = "Invalid input";
 			proceed = false;
 		}
+		
+		/* Validate dynamically added appliance */
+		
+		if(table && (rows = table.rows)) {
+			for(var i = 0, n = rows.length - 1; i < n; i++) {
+				
+				row = eval("ApplianceName".concat(i));
+				cnum = eval("controlNum".concat(i));
+				month = eval("dateInstalledMonth".concat(i));
+				
+				if (row.value.trim().toUpperCase() != "NONE"){
+					if (cnum.value != "" && cnum.value.length <= 10 && !isNaN(cnum.value))	
+						document.getElementById("controlNum".concat(i)).style.background="white";
+					else
+					{
+						document.getElementById("controlNum".concat(i)).style.background="#FCBBBB";
+						proceed = false;
+					}
+					
+					if (month.value != "0")	{
+						document.getElementById("dateInstalledMonth".concat(i)).style.color="black";
+					
+					}else
+					{
+						document.getElementById("dateInstalledMonth".concat(i)).style.color ="salmon";
+						
+						proceed = false;
+					}
+					
+				}
+				else{
+					document.getElementById("controlNum".concat(i)).style.background="white";
+					document.getElementById("dateInstalledMonth".concat(i)).style.background="white";
+				}
+				
+			}
+		}
+		
+		/* Validate Log Info */
+		
+		if (MonthLI1.value.trim().toUpperCase() != "0")
+			document.getElementById("MonthLI1").style.color="black";
+		else
+		{
+			document.getElementById("MonthLI1").style.color="salmon";
+			proceed = false;
+		}
 
+		/*if (MonthLI2.value.trim().toUpperCase() != "0")
+			document.getElementById("MonthLI2").style.color="black";
+		else
+		{
+			document.getElementById("MonthLI2").style.color="salmon";
+			proceed = false;
+		}*/
+		
+		if (form5.value.length <= 15)
+			document.getElementById("form5").style.background="white";
+		else
+		{
+			document.getElementById("form5").style.background="#FCBBBB";
+			proceed = false;
+		}
+		
+		if (room.value != "" && room.value.length <= 4)
+			document.getElementById("room").style.background="white";
+		else
+		{
+			document.getElementById("room").style.background="#FCBBBB";
+			proceed = false;
+		}
+		
+		/* Validate Reservation */
+				
+		if (OrNum.value != "" && OrNum.value.length <= 15)
+			document.getElementById("OrNum").style.background="white";
+		else
+		{
+			document.getElementById("OrNum").style.background="#FCBBBB";
+			proceed = false;
+		}
+		
+		if (MonthR.value.trim().toUpperCase() != "0")
+			document.getElementById("MonthR").style.color="black";
+		else
+		{
+			document.getElementById("MonthR").style.color="salmon";
+			proceed = false;
+		}
+		
+		if (Amount.value != "" && Amount.value.length <= 11 && !isNaN(Amount.value))
+			document.getElementById("Amount").style.background="white";
+		else
+		{
+			document.getElementById("Amount").style.background="#FCBBBB";
+			proceed = false;
+		}
+
+		if (Remarks.value.length <= 30)
+			document.getElementById("Remarks").style.background="white";
+		else
+		{
+			document.getElementById("Remarks").style.background="#FCBBBB";
+			proceed = false;
+		}
+	
+		
+		/* Validate Key */
+				
+		if (OrNumKey.value != "" && OrNumKey.value.length <= 15)
+			document.getElementById("OrNumKey").style.background="white";
+		else
+		{
+			document.getElementById("OrNumKey").style.background="#FCBBBB";
+			proceed = false;
+		}
+		
+		if (MonthRec.value.trim().toUpperCase() != "0")
+			document.getElementById("MonthRec").style.color="black";
+		else
+		{
+			document.getElementById("MonthRec").style.color="salmon";
+			proceed = false;
+		}
+		
+		/*if (MonthRet.value.trim().toUpperCase() != "0")
+			document.getElementById("MonthRet").style.color="black";
+		else
+		{
+			document.getElementById("MonthRet").style.color="salmon";
+			proceed = false;
+		}*/
+		
+		if (AmountKey.value != "" && AmountKey.value.length <= 11 && !isNaN(AmountKey.value))
+			document.getElementById("AmountKey").style.background="white";
+		else
+		{
+			document.getElementById("AmountKey").style.background="#FCBBBB";
+			proceed = false;
+		}
+
+		if (RemarksKey.value.length <= 30)
+			document.getElementById("RemarksKey").style.background="white";
+		else
+		{
+			document.getElementById("RemarksKey").style.background="#FCBBBB";
+			proceed = false;
+		}
 	return proceed;
 }
 	
 //	return proceed;
 }
 
+function validateDormForm(dormForm)
+{	
+	var proceed = true;
+	
+		with(dormForm)
+	{
+		if (dormname.value.trim() != "" && dormname.value.length <= 50)
+			dname.innerHTML = "";
+		else
+		{
+			dname.innerHTML = "Invalid dormitory name";
+			proceed = false;
+		}
+		
+		if (alias.value.trim() != "" && alias.value.length <= 30)
+			als.innerHTML = "";
+		else
+		{
+			als.innerHTML = "Invalid alias";
+			proceed = false;
+		}
+		
+		if (monthlyrent.value.trim() != "" && !isNaN(monthlyrent.value))
+			mrent.innerHTML = "";
+		else
+		{
+			mrent.innerHTML = "Invalid amount";
+			proceed = false;
+		}
+		
+		if (dailyrent.value.trim() != "" && !isNaN(dailyrent.value))
+			drent.innerHTML = "";
+		else
+		{
+			drent.innerHTML = "Invalid amount";
+			proceed = false;
+		}
+		
+		if (noRooms.value.trim() != "" && !isNaN(noRooms.value))
+			noRm.innerHTML = "";
+		else
+		{
+			noRm.innerHTML = "Invalid input";
+			proceed = false;
+		}
+		
+		if (noPerRoom.value.trim() != "" && !isNaN(noPerRoom.value))
+			noPerRm.innerHTML = "";
+		else
+		{
+			noPerRm.innerHTML = "Invalid input";
+			proceed = false;
+		}
+		
+		if (occ.value.trim() != "" && !isNaN(occ.value))
+			docc.innerHTML = "";
+		else
+		{
+			docc.innerHTML = "Invalid input";
+			proceed = false;
+		}
+		
+		if (MaleOcc.value.trim() != "" && !isNaN(MaleOcc.value))
+			mocc.innerHTML = "";
+		else
+		{
+			mocc.innerHTML = "Invalid input";
+			proceed = false;
+		}
+		
+		if (FemaleOcc.value.trim() != "" && !isNaN(FemaleOcc.value))
+			focc.innerHTML = "";
+		else
+		{
+			focc.innerHTML = "Invalid input";
+			proceed = false;
+		}
+		
+		if (parseInt(MaleOcc.value.trim()) + parseInt(FemaleOcc.value.trim()) == parseInt(occ.value.trim()))
+			docc.innerHTML = "";
+		else
+		{
+			docc.innerHTML = "Values does not match";
+			proceed = false;
+		}
+		
+		if (TFUP.value.trim() != "" && !isNaN(TFUP.value))
+			noTFUP.innerHTML = "";
+		else
+		{
+			noTFUP.innerHTML = "Invalid input";
+			proceed = false;
+		}
+		
+		if (TFNUP.value.trim() != "" && !isNaN(TFNUP.value))
+			noTFNUP.innerHTML = "";
+		else
+		{
+			noTFNUP.innerHTML = "Invalid input";
+			proceed = false;
+		}
+		if (cluster.value.trim() != "" && cluster.value.length <= 180)
+			clstr.innerHTML = "";
+		else
+		{
+			clstr.innerHTML = "Invalid input";
+			proceed = false;
+		}
+		if (SY.value.trim() != "" && SY.value.length <= 10)
+			noSY.innerHTML = "";
+		else
+		{
+			noSY.innerHTML = "Invalid School Year";
+			proceed = false;
+		}
+		
+		
+		
+		
+		
+		return proceed;	
+	
+}
+
+//	return proceed;
+}
 function getCourse(value){
 	if(value=="CA"){
 		document.getElementById('courses').innerHTML =
@@ -453,27 +962,30 @@ function setBatch(batch){
 	
 }
 
-function getMonth(month)
+
+
+
+function getMonth(month,DayId,YearId)
 {
 var str="";	
 var bool =0;
 	if (month.length==0)
   	{ 
-	document.getElementById("Day").innerHTML="";
-	document.getElementById("Year").innerHTML="";
+	document.getElementById(DayId).innerHTML="";
+	document.getElementById(YearId).innerHTML="";
 
   	return;
   	}
-	if(month=="Jan"||month=="Mar"||month=="May"||month=="Jul"||month=="Aug"||month=="Oct"||month=="Dec")
+	if(month=="Jan"|| month== 1||month=="Mar"||month== 3||month=="May"||month== 5||month=="Jul"||month== 7||month=="Aug"||month== 8||month=="Oct"||month== 10||month=="Dec"||month== 12)
 	{
 	str= returnOpt(1,31);
 	}else{
 		
-		if(month=="Apr"||month=="Jun"||month=="Sep"||month=="Nov"){
+		if(month=="Apr"||month== 4||month=="Jun"||month== 6||month=="Sep"||month== 9||month=="Nov"||month== 11){
 			
 			str =  returnOpt(1,30);//30 days
 		}else{
-		if(month=="Feb"){
+		if(month=="Feb"||month== 2){
 			
 			str = returnOpt(1,28);//28 days
 		}else{
@@ -483,112 +995,18 @@ var bool =0;
 		}
 	}
 
-	document.getElementById("Day").innerHTML='<select name="Day" >'+str+'</select>';
+	document.getElementById(DayId).innerHTML='<select name="'+DayId+'">'+str+'</select>';
 	
 	if(bool==0){
-		document.getElementById("Year").innerHTML='<select name="Year" >'+returnOpt(1950,2011)+'</select>';
+		var d = new Date();
+		document.getElementById(YearId).innerHTML='<select name="'+YearId+'" >'+returnOpt(1950,d.getFullYear()+1)+'</select>';
 	}else{
 		
-		document.getElementById("Year").innerHTML='<select name="Year" ><option value="">Year</select>';
+		document.getElementById(YearId).innerHTML='<select name="'+YearId+'" ><option value="">Year</select>';
 		
 	}
 
 }
-
-function getStartMonth(month)
-{
-var str="";	
-var bool =0;
-	if (month.length==0)
-  	{ 
-  
-	document.getElementById("startDay").innerHTML="";
-	document.getElementById("startYear").innerHTML="";
-	
-	
-	
-  	return;
-  	}
-	if(month=="Jan"||month=="Mar"||month=="May"||month=="Jul"||month=="Aug"||month=="Oct"||month=="Dec")
-	{
-	str= returnOpt(1,31);
-	}else{
-		
-		if(month=="Apr"||month=="Jun"||month=="Sep"||month=="Nov"){
-			
-			str =  returnOpt(1,30);//30 days
-		}else{
-		if(month=="Feb"){
-			
-			str = returnOpt(1,28);//28 days
-		}else{
-			bool = 1;
-			str = '<option value ="">Day</option>';
-		}
-		}
-	}
-
-	  
-
-	document.getElementById("startDay").innerHTML='<select name="startDay" >'+str+'</select>';
-	
-	if(bool==0){
-		document.getElementById("startYear").innerHTML='<select name="startYear" >'+returnOpt(1950,2011)+'</select>';
-	}else{
-		
-		document.getElementById("startYear").innerHTML='<select name="startYear" ><option value="">Year</select>';
-		
-	}
-
-}
-
-function getCompMonth(month)
-{
-var str="";	
-var bool =0;
-	if (month.length==0)
-  	{ 
-  
-	document.getElementById("compDay").innerHTML="";
-	document.getElementById("compYear").innerHTML="";
-	
-	
-	
-  	return;
-  	}
-	if(month=="Jan"||month=="Mar"||month=="May"||month=="Jul"||month=="Aug"||month=="Oct"||month=="Dec")
-	{
-	str= returnOpt(1,31);
-	}else{
-		
-		if(month=="Apr"||month=="Jun"||month=="Sep"||month=="Nov"){
-			
-			str =  returnOpt(1,30);//30 days
-		}else{
-		if(month=="Feb"){
-			
-			str = returnOpt(1,28);//28 days
-		}else{
-			bool = 1;
-			str = '<option value ="">Day</option>';
-		}
-		}
-	}
-
-	  
-
-	document.getElementById("compDay").innerHTML='<select name="compDay" >'+str+'</select>';
-	
-	if(bool==0){
-		document.getElementById("compYear").innerHTML='<select name="compYear" >'+returnOpt(1950,2011)+'</select>';
-	}else{
-		
-		document.getElementById("compYear").innerHTML='<select name="compYear" ><option value="">Year</select>';
-		
-	}
-
-}
-
 function returnOpt(s,e){
 	
 	var i = s;

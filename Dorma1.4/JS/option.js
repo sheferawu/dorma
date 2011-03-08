@@ -1,9 +1,10 @@
 /**
  * 
  */
-
+var xmlhttp;
  var xmlHttp44;
  var xmlHttp22;
+ var xmlHttp222;
  var xmlHttp33;
 var cat;
 
@@ -55,26 +56,23 @@ var cat;
  		{ 
  			
  		document.getElementById("div"+cat).innerHTML=xmlHttp22.responseText;
- 		}//}catch(err){}
+ 		}else{
+ 			document.getElementById("div"+cat).innerHTML = '<img src="IMG/circleload.gif" /> Loading Content...';
+ 			
+ 		}
  		}
  
-		function addApp()
-			{	var tbl = document.getElementById('app');
+		function addApp(appId,arr)
+			{	var tbl = document.getElementById(appId);
 					
 					var lastRow = tbl.rows.length;
 					var iteration = lastRow-1;
-					
-					
+				
+					arr1= arr = arr.split("*");
 					var row = tbl.insertRow(lastRow);
 					var cellRight;
 					var el;
 					var cnt = 0;
-					var arr = new Array('NONE','RADIO','EF', 'CW/P', 'CW/OP');
-					var arr1 = new Array('None','Radio','Electric Fan', 'Computer With Printer', 'Computer With Out Printer');
-
-					
-					
-					
 					cellRight = row.insertCell(0);
 					el = document.createElement('select');
 					el.name = "ApplianceName" + (iteration);
@@ -94,14 +92,43 @@ var cat;
 						
 						el.id = "controlNum" + (iteration);
 						el.size = "7";
-					    cellRight.appendChild(el);
+						
+						cellRight.appendChild(el);
 						
 					cellRight = row.insertCell(2);
-						el = document.createElement('input');
-						el.type = 'text';
-						el.name = "dateInstalled" + (iteration);
-						el.id = "dateInstalled" + (iteration);
-						cellRight.appendChild(el);
+					el = document.createElement('select');
+					el.name = "dateInstalledMonth" + (iteration);
+					el.id = "dateInstalledMonth" + (iteration);
+					el.options[0] = new Option("M", "0");;
+					
+					for(cnt1=1;cnt1<=12;cnt1++){
+						
+						 el.options[cnt1] = new Option(cnt1, cnt1);
+						 }
+					
+					cellRight.appendChild(el);
+					
+					cellRight = row.insertCell(3);
+					el = document.createElement('select');
+					el.name = "dateInstalledDay" + (iteration);
+					el.id = "dateInstalledDay" + (iteration);
+					
+					el.options[0] = new Option("D", "0");;
+					cellRight.appendChild(el);
+					
+
+					cellRight = row.insertCell(4);
+					el = document.createElement('select');
+					el.name = "dateInstalledYear" + (iteration);
+					el.id = "dateInstalledYear" + (iteration);
+					
+					el.options[0] = new Option("Y", "0");;
+					cellRight.appendChild(el);
+					
+					
+				
+					document.getElementById('dateInstalledMonth'+(iteration)).onchange = Function("getMonth(this.options[this.selectedIndex].value,'dateInstalledDay"+(iteration)+"','dateInstalledYear"+(iteration)+"')") ;
+			
 					var xmlHttp22=GetXmlHttpObject();
 						if (xmlHttp22==null)
 						{
@@ -114,8 +141,52 @@ var cat;
 					xmlHttp22.open("GET",url,true);
 					xmlHttp22.send(null);
 		
-		}
+				
+			}
+		
+		function addAppSet(appId){
+			var tbl = document.getElementById(appId);
+			var lastRow = tbl.rows.length;
+			var iteration = lastRow-1;
+			var row = tbl.insertRow(lastRow);
+			var cellRight;
+			var el;
+			
+			
+			cellRight = row.insertCell(0);
+			el = document.createElement('input');
+			el.type = 'text';
+			el.name = "App" + (iteration);
+			el.id = "App" + (iteration);
+			cellRight.appendChild(el);
+			
+			cellRight = row.insertCell(1);
+			el = document.createElement('input');
+			el.type = 'text';
+			el.name = "AppMonth" + (iteration);
+			el.id = "AppMonth" + (iteration);
+			cellRight.appendChild(el);
+			
+			cellRight = row.insertCell(2);
+			el = document.createElement('input');
+			el.type = 'text';
+			el.name = "AppDaily" + (iteration);
+			el.id = "AppDaily" + (iteration);
+			cellRight.appendChild(el);
+			
+			var xmlHttp222=GetXmlHttpObject();
+			if (xmlHttp222==null)
+			{
+			alert ("Your browser does not support AJAX!");
+			return;
+			}	 
+		var newIteration = iteration+1;
+		var url="index.php?c=dorm&m=setNumApp";
+		url=url+"&numapp="+(newIteration);
+		xmlHttp222.open("GET",url,true);
+		xmlHttp222.send(null);
 
+		}
 		function removeApp()
 		{
 		  var tbl = document.getElementById('app');
@@ -153,7 +224,18 @@ var cat;
 			return;
 		}
 	
-	
+	function statechange101(){
+		
+		if (xmlhttp.readyState==4)
+		{
+			
+		document.getElementById('content').innerHTML=xmlhttp.responseText;
+		}else{
+			document.getElementById('content').innerHTML = '<center><img src="IMG/squareload.gif" /> Loading Content...</center>';
+			
+			
+		}
+	}
 	function submitThis(numClus,paid,ornum,datepaid,remarks){
 		//alert(document.getElementById(paid).checked);
 		/**/
@@ -227,7 +309,8 @@ var cat;
 		return xmlHttp;
 		}
 	
-			function loadXMLDoc(url){
+		function loadXMLDoc(url){
+			//alert("lol");
 				if (window.XMLHttpRequest){		// code for IE7+, Firefox, Chrome, Opera, Safari
 					xmlhttp=new XMLHttpRequest();
 				}else{		// code for IE6, IE5
@@ -235,10 +318,15 @@ var cat;
 				}
 				xmlhttp.open("GET",url,false);
 				xmlhttp.send(null);
+				//xmlhttp.onreadystatechange = statechange101;
 				document.getElementById('content').innerHTML=xmlhttp.responseText;
 				document.getElementById('search').value="Search...";
 				document.getElementById('suggest').innerHTML="";	
-
+				document.getElementById("suggest").style.visibility="hidden";
+				document.getElementById("residentSearch").innerHTML="";
+				document.getElementById("transientSearch").innerHTML="";
+				
+				 $("div.suggest").hide();
 				 $("div.appliance_info").hide();	
 				 $("div.resident_info").hide();
 				 $("div.accomodation_info").hide();
@@ -255,7 +343,9 @@ var cat;
 				 $("div.balanceTable").hide();
 				 $("div.other_info").hide();
 				 $("div.custodian_info").hide();
+			
 			}
+
 
 			function loadAppliances(url){
 				
@@ -299,3 +389,6 @@ var cat;
 				
 				
 			}
+			
+			
+			
