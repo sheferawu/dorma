@@ -1,11 +1,10 @@
 Files:
 
-Document:
+Document:<br/>
 <a href="https://docs0.google.com/document/d/17zoVWDaD1bkQkKavFPEuJPPb0KIP7lOOxiD44ERUVQA/edit?hl=en&authkey=CLaz5I8J#" target="_blank">User Story</a><br/>
 
-Spread Sheet:
+Spread Sheet:<br/>
 <a href="https://spreadsheets.google.com/ccc?key=0Al2bpMt6iHBbdEtCblR1RlJXY1pfZXhXOFBBRE9KVkE&hl=en&authkey=CJGw464O#gid=0" target="_blank">Estimates</a>
-
 <a href="https://spreadsheets.google.com/ccc?hl=en&key=t7oilTpyWVqfQFejo3WmSHA&hl=en#gid=0" target="_blank">Estimates (New)</a>
 
 
