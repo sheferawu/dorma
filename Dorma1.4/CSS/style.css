@@ -1,6 +1,11 @@
-body{
+.homeBody{
 	background: #fff;
 	font-family: Arial;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#212222', endColorstr='#818181'); /* for IE */
+	background: -webkit-gradient(linear, left top, left bottom, from(#212222), to(#818181)); /* for webkit browsers */
+	background: -moz-linear-gradient(top, #212222, #818181); /* for firefox 3.6+ */
+	background-repeat: repeat-x;
+
 }
 
 .top_links{
@@ -10,24 +15,55 @@ body{
 	font-size: 13px;
 }
 
-.top_links a{
+.top_links a,.top_links input[type="button"]{
 	color: gray;
 }
 
-.top_links a:hover{
+.top_links a:hover,.top_links input[type="button"]:hover{
 	border-bottom: 2px solid rgb(43, 182, 211);
 	text-decoration: none;
+	cursor: pointer;
 }
+.top_links input[type="button"]{
+	background: none;
+	border: 0;
+	padding: 0px;
+	margin:0px;
+}
+
 
 .maindiv{
 	margin-left: auto ;
 	margin-right: auto ;
-	width: 880px;
-	height: 640px;
+	width: 1000px;
 	padding: 25px;
 	position: relative;
 	background: white;
+	-moz-box-shadow: 2px 2px 3px gray;
+	-webkit-box-shadow: 2px 2px 3px gray;
+	box-shadow: 2px 2px 3px gray;
 }
+
+.message{
+	margin-left: auto ;
+	margin-right: auto ;
+	width: 500px;
+	padding: 5px;
+}
+
+.horizontalBar{
+	width: 1000px;
+	padding: 0px;
+	margin: 0px;
+	-moz-border-radius: 10px 10px 10px 10px;
+	-webkit-border-radius: 10px 10px 10px 10px;
+	background: rgb(43, 182, 211);
+}
+
+.horizontalBar td{
+	padding: 0px;
+}
+
 
 .sidebar{
 	background: rgb(243,243,243);
@@ -36,12 +72,6 @@ body{
 	text-align: center;
 	float:left;
 	padding: 20px;
-}
-
-.container{
-	float: right;
-	width: 600px;
-	line-height: 19px;
 }
 
 a{
@@ -55,11 +85,16 @@ a:hover{
 }
 
 .date{
+	margin-top: 13px;
 	font-size: 13px;
 	color: gray;
 	text-align: right;
 	line-height: 10px;
 	margin-right: 10px;
+}
+
+.searchBar{
+	text-align: center;
 }
 
 .searchbox{
@@ -71,23 +106,24 @@ a:hover{
 	-webkit-border-radius: 10px 10px 10px 10px;
 	color: #363636;
 	font-size: 14px;
-	width: 220px;
+	width: 240px;
+	margin-left: auto;
 }
 
 .suggestionbox{
 	position: relative;
 	text-align: left;
-	background: rgb(243, 243, 243);
-	border-width: 1px;
-	border-color: rgb(149, 149, 149);
+	background: white;
+	border: 1px gray solid;
 	padding: 4px;
 	color: #363636;
 	font-size: 14px;
-	width: 197px;
-	margin-right: 7px;
+	width: 217px;
+	margin-right: 30px;
 	line-height: 25px;
 	position: absolute;
 	right: 25;
+	visibility: hidden;
 }
 
 
@@ -97,6 +133,7 @@ a:hover{
 
 .content{
 	font-size: 13px;
+	z-index: -1;
 }
 
 table{
@@ -107,11 +144,13 @@ td{
 	padding: 5px;
 }
 
+
+
 .error{
 	color: salmon;
 	font-weight: bold;
 	width: 115px;
-	font-size: 12px;
+	font-size: 13px;
 }
 
 .digit{
@@ -129,6 +168,10 @@ td{
 	text-decoration: underline;
 	cursor: pointer;
 
+}
+
+.content{
+	
 }
 
 .addResi tr{
@@ -152,7 +195,7 @@ td{
 	border: 1px solid #a0a0a0;
 	margin: 0 auto;	
 	margin-top: 1;
-	width: 585px;
+	width: 685px;
 }
 
 .sorted_item {
@@ -178,21 +221,22 @@ td{
 .addApp tr, .addApp td, .addApp th,
 .tally tr, .tally td, .tally th,
 .recordOfP tr, .recordOfP td, .recordOfP th,
+.view_trans tr, .view_trans td, .view_trans th,
 .view_resi tr, .view_resi td, .view_resi th,
 .balanceTable td, .balanceTable tr, .balanceTable th,
 .log_table td, .log_table tr, .log_table th,
 .reservation_table td, .reservation_table tr, .reservation_table th,
 .key_table td, .key_table tr, .key_table th,
 .custodian_table td, .custodian_table tr, .custodian_table th,
-.otherInfo_table td, .otherInfo_table tr, .otherInfo_table th{
+.otherInfo_table td, .otherInfo_table tr, .otherInfo_table th, .addTransient tr, .addTransient td, .addTransient th{
 	border: 1px solid #a0a0a0;
 	border-top: 0px;
 	padding: 5px;
 }
 
-.recordOfP,.tally, .view_resi, .balance_table, .key_table, .log_table, .reservation_table,
-.addApp, .addResi, .custodian_table, .otherInfo_table, .appliance_table{
-	width: 601px;
+.recordOfP,.tally, .view_resi,.view_trans, .balance_table, .key_table, .log_table, .reservation_table,
+.addApp, .addResi, .custodian_table, .otherInfo_table, .appliance_table, .addTransient{
+	width: 701px;
 }
 
 
@@ -206,67 +250,303 @@ td{
 	/*color:rgb(43, 182, 211);*/
 }
 
-ul#menu, ul#menu ul {
+ul#jsddm, ul#jsddm ul {
   list-style-type:none;
-  margin: 0;
-  padding: 0;
+  margin: 0px;
+  padding: 0px;
 }
 
-ul#menu li {
-  margin-top: 1px;
-  line-height: 0px;
-	
+ul#jsddm li {
+	margin-top: 0px;
+	line-height: 0px;
+	float: left;
+	margin-right: 1px;
 }
 
-#menu input[type="button"]{
-	background: rgb(43, 182, 211) url(IMG/gradient1.png);
+
+#jsddm input[type="button"].add_title{
+	-moz-border-radius: 10px 00px 00px 10px;
+	-webkit-border-radius: 10px 00px 00px 10px;
+}
+
+#jsddm input[type="button"].sort_title, #jsddm input[type="button"].report_title, #jsddm input[type="button"].tally_title, #jsddm input[type="button"].add_title{
+	text-align: center;
+	width: 140px;
+	height: 50px;
+	border-right: 1px #8DCAD6 solid;
+}
+
+#jsddm input[type="button"].project_title{
+	width: 150px;
+	text-align: center;
+	height: 50px;
+	border-right: 1px #8DCAD6 solid;
+}
+
+#jsddm input[type="button"]{
+	background: rgb(43, 182, 211);
 	color: white;
-	padding: 5px;
-	width: 200px;
 	border: 1px;
 	background-repeat: repeat-x;
 	background-position: top left;
 	text-align: left;
+	
 }
 
-#menu input[type="button"]:hover{
+#jsddm input[type="button"]:hover{
 	background-color: #363636;
-	background-image: url(IMG/gradient2.png);
-	background-repeat: repeat-x;
-	background-position: top left;
 	text-decoration: none;
+	
 }
 
-#sort_option input[type="button"]{
-	text-indent: 10px;
-	font-size: 12px;
-}
-#report_option input[type="button"]{
-	text-indent: 10px;
-	font-size: 13px;
-}
-.menuOpt{
-	text-align: center;
+#jsddm li ul{
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	visibility: hidden;
+	float: none;
+	width: 100px;
+	display: block;
+	z-index: 10;
 }
 
-#sort_option input[type="button"]{
-	background-color: #C1C1C1;
+#jsddm li ul#report_option{
+	width: 200px;
+	background: rgb(43, 182, 211);
+	
+}
+
+#jsddm li ul#sort_option{
+	width: 139px;
+	background: rgb(43, 182, 211);
+	
+}
+
+#jsddm li ul#project_option{
+	width: 139px;
+	background: rgb(43, 182, 211);
+}
+
+#jsddm li ul#add_option{
+	background: rgb(43, 182, 211);
+	margin-left: 10px;
+	width: 120px;
+}
+
+
+
+#jsddm li ul li{
+	float: none;
+	display: inline;
+
+}
+
+#jsddm li ul li input[type="button"]{
+	width: 139px;
+	padding: 5px;
+}
+
+#jsddm li ul li input[type="button"].repOpt{
+	width: 200px;
+}
+
+#jsddm li ul li input[type="button"].addOpt{
+	width: 120px;
+}
+
+
+#sort_option input[type="button"], #report_option input[type="button"], #add_option input[type="button"]{
 	color: black;
+	background: rgb(43, 182, 211);
+	padding: 5px;
 }
 
-#sort_option input[type="button"]:hover{
-	background-color: #929292;
-}
-
-#report_option input[type="button"]{
-	background-color: #C1C1C1;
+#project_option input[type="button"]{
 	color: black;
+	background: rgb(43, 182, 211);
+	padding: 5px;
 }
 
-#report_option input[type="button"]:hover{
-	background-color: #929292;
+#project_option input[type="button"]:hover{
+	color: white;
+	background: #363636;
+	padding: 5px;
+}
+
+#sort_option input[type="button"]:hover, #report_option input[type="button"]:hover, #add_option input[type="button"]:hover{
+	background-color: #363636;
+	color: white;
 }
 
 .app{
 	width: 550px;
+}
+
+.project_table td, .project_table th{
+	padding: 5px;
+}
+
+.footer{
+	color: #DFDFDF;
+	font-size: 12px;
+	text-align: center;
+}
+
+.loginBody{
+	margin-left: auto;
+	margin-right: auto;
+	margin: 0px;
+}
+
+
+.logTable td{
+	padding: 0px;
+}
+
+
+.loginHeader{
+	margin-left: 22px;
+	width: 157px;
+	height: 51px;
+}
+
+.mainLogDiv{
+	
+	width: 820px;
+	margin-left: auto;
+	margin-right: auto;
+	height: 420px;
+}
+
+.background{
+	background: #F1F1F1;
+	height: 30px;
+}
+
+.dormInfo{
+	-webkit-border-radius: 23px 0px 0px 0px;
+  	-moz-border-radius: 23px 0px 0px 0px;
+	width: 250px;
+	background: #2BB6D3;
+	float: left;
+	height: 375px;
+	padding: 15px;
+	color: white;
+	text-align: right;
+	-moz-box-shadow: 2px 2px 3px gray;
+	-webkit-box-shadow: 2px 2px 3px gray;
+	padding-top: 30px;
+}
+
+#dormTitle{
+	font-weight: bold;
+	font-size: 20px;	
+}
+
+
+.login{
+	-webkit-border-radius: 0px 0px 23px 0px;
+  	-moz-border-radius: 23px 0px 0px 0px;
+  	-moz-box-shadow: 2px 2px 3px gray;
+	-webkit-box-shadow: 2px 2px 3px gray;
+	float: left;
+	background: #F1F1F1;
+	width: 510px;
+	height: 390px;
+	padding: 15px;
+}
+
+
+.errorMessage{
+	color: salmon;
+	height: 30px;
+}
+
+.logTable th{
+	text-align: left;
+	color: #565656;	
+}
+
+#logFooter{
+	color: dimgray;
+}
+
+div.sc_menu {
+  /* Set it so we could calculate the offsetLeft */
+  position: relative;
+  height: 165px;
+  width: 500px;
+  color: black;
+  /* Add scroll-bars */
+  overflow: auto;
+}
+ul.sc_menu {
+  display: block;
+  height: 110px;
+  /* Max width here, for users without Javascript */
+  width: 1500px;
+  padding: 15px 0 0 15px;
+  /* Remove default margin */
+  margin: 0;
+  background: url('navigation.png');
+  list-style: none;
+}
+.sc_menu li {
+  display: block;
+  float: left;
+  padding: 0 4px;
+}
+.sc_menu a {
+  display: block;
+  text-decoration: none;
+}
+.sc_menu span {
+  /* We want a caption to display on the next line */
+  display: block;
+  margin-top: 3px;
+  text-align: center;
+  font-size: 12px;
+  color: black;
+}
+
+.sc_menu span {
+  display: none;
+  margin-top: 3px;
+  text-align: center;
+  font-size: 12px;
+  color: black;
+}
+.sc_menu a:hover span {
+  display: block;
+}
+.sc_menu img {
+  border: 0px yellow solid;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+}
+
+
+.sc_menu a:hover img {
+  filter:alpha(opacity=50);
+  opacity: 0.5;
+}
+
+#fixedtipdiv{
+	position:absolute;
+	padding: 2px;
+	border:1px solid black;
+	font:normal 12px Verdana;
+	line-height:18px;
+	z-index:100;
+}
+
+a.genRepTxt{
+	font: normal 14px Arial;
+	color: #363636;
+	font-weight: bold;
+}
+
+a.genRepTxt:hover{
+	border-bottom: 2px solid rgb(43, 182, 211);
+	text-decoration: none;
 }
