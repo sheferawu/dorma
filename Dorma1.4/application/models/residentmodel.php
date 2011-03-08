@@ -1,28 +1,60 @@
 <?php 
 
 class Residentmodel extends CI_Model {
-
+ var $db_group_name2 = "dorm";
 
    function __construct()
     {
         // Call the Model constructor
         parent::__construct();
-        $this->load->database();
-    	$this->load->library('MyClasses/OptionClass');
+     $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	$this->load->model('optionmodel');
     }
+   function get_database_group() {
+        return $this->db_group_name2;
+    }
+   function  searchGuarantor($str){
+   	$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    $query = "Select FirstName,MidName,LastName From Resident where FirstName Like '%$str%' OR MidName Like '%$str%' OR LastName Like '%$str%'";
+   	$table="<table id=\"sg\" border=\"0\">";
+    $res=$this->{$this->db_group_name2}->query($query);
+   	if($res->num_rows()>0){
+   		$cnt = 0;
+   		foreach($res->result() as $r){
+   			$r->FirstName = ucwords(strtolower($r->FirstName));
+   			$r->MidName = ucwords(strtolower($r->MidName));
+   			$r->LastName= ucwords(strtolower($r->LastName));
+   			$table.="<tr><td onclick = 'setValue2(this.innerText)' onkeydown='setValue2(this.innerText)'>$r->FirstName $r->MidName  $r->LastName</td></tr>";
+   			$cnt++;
+   			if($cnt>=2)break;
+   		}
+   	}else{
+   		$table.="<tr><td id=\"nrf\">No Record Found</td></tr>";
+   	}
+    $table.="</table>";
+   	return $table;
+   }
+   function	getNumApp($fname,$mname,$lname){
+  		$query = $this->{$this->db_group_name2}->query("SELECT Count(*) from appliances WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$ar = $query->result();
+  		$ar = (array)$ar[0];
     
+    	$ar = array_values($ar);
+    	return $ar[0];	
+   }
    function edit_resident($fname,$lname,$mname){
 		
 		$_SESSION["fname"] = $fname;
 		$_SESSION["lname"] = $lname;
 		$_SESSION["mname"] = $mname;
 		
-		$this->load->database();
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
 		
-		$query = $this->db->query("SELECT * from resident WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$opt = new OptionClass();
+		$query = $this->{$this->db_group_name2}->query("SELECT * from resident WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		//$this->Optionmodel = new OptionClass();
 		$r ="";
-		$arrResField = $opt->returnFieldsArray("Resident");
+		$arrResField = $this->Optionmodel->returnFieldsArray("Resident");
 		$cnt = 0;
 		foreach ($query->result() as $row)
 		{
@@ -32,8 +64,8 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-		$query = $this->db->query("SELECT * from scholarship WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("scholarship");
+		$query = $this->{$this->db_group_name2}->query("SELECT * from scholarship WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("scholarship");
 
 		foreach ($query->result() as $row)
 		{
@@ -43,8 +75,8 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-		$query = $this->db->query("SELECT * from custodian WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("custodian");
+		$query = $this->{$this->db_group_name2}->query("SELECT * from custodian WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("custodian");
 
 		foreach ($query->result() as $row)
 		{
@@ -54,8 +86,8 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-		$query = $this->db->query("SELECT * from othersourcesincome WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("othersourcesincome");
+		$query = $this->{$this->db_group_name2}->query("SELECT * from othersourcesincome WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("othersourcesincome");
 
 		foreach ($query->result() as $row)
 		{
@@ -65,8 +97,8 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-		$query = $this->db->query("SELECT * from hobbies WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("hobbies");
+		$query = $this->{$this->db_group_name2}->query("SELECT * from hobbies WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("hobbies");
 
 		foreach ($query->result() as $row)
 		{
@@ -77,8 +109,8 @@ class Residentmodel extends CI_Model {
 		}
 		
 		
-		$query = $this->db->query("SELECT * from honorsreceived WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("honorsreceived");
+		$query = $this->{$this->db_group_name2}->query("SELECT * from honorsreceived WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("honorsreceived");
 
 		foreach ($query->result() as $row)
 		{
@@ -88,8 +120,8 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-		$query = $this->db->query("SELECT * from talent WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("talent");
+		$query = $this->{$this->db_group_name2}->query("SELECT * from talent WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("talent");
 
 		foreach ($query->result() as $row)
 		{
@@ -99,8 +131,8 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-		$query = $this->db->query("SELECT * from org WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("org");
+		$query = $this->{$this->db_group_name2}->query("SELECT * from org WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("org");
 
 		foreach ($query->result() as $row)
 		{
@@ -110,8 +142,20 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-		$query = $this->db->query("SELECT * from appliances WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("appliances");
+		$query = $this->{$this->db_group_name2}->query("SELECT * from appliances WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("appliances");
+$cnt = 0;
+		foreach ($query->result() as $row)
+		{
+			
+			foreach($arrResField as $af){
+			$r[$af."".$cnt] = strtolower($row->$af);
+			}
+			$cnt++;
+		}
+		
+		$query = $this->{$this->db_group_name2}->query("SELECT * from residentloginfo WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("residentloginfo");
 
 		foreach ($query->result() as $row)
 		{
@@ -121,8 +165,8 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-		$query = $this->db->query("SELECT * from residentloginfo WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("residentloginfo");
+		$query = $this->{$this->db_group_name2}->query("SELECT * from reservation WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("reservation");
 
 		foreach ($query->result() as $row)
 		{
@@ -132,19 +176,8 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-		$query = $this->db->query("SELECT * from reservation WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("reservation");
-
-		foreach ($query->result() as $row)
-		{
-			$cnt = 0;
-			foreach($arrResField as $af){
-			$r[$af] = strtolower($row->$af);
-			}
-		}
-		
-	$query = $this->db->query("SELECT * from residentkey WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
-		$arrResField = $opt->returnFieldsArray("residentkey");
+	$query = $this->{$this->db_group_name2}->query("SELECT * from residentkey WHERE FirstName='$fname' AND LastName='$lname' AND MidName='$mname'");
+		$arrResField = $this->Optionmodel->returnFieldsArray("residentkey");
 
 		foreach ($query->result() as $row)
 		{
@@ -159,38 +192,72 @@ class Residentmodel extends CI_Model {
 
 	    
    function delete_resident($fname,$lname,$mname){
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+	
+		//$con = $this->{$this->db_group_name2}->connect("localhost","DORMA","dorm");
 		
-		$con = mysql_connect("localhost","DORMA","dorm");
+		//$this->{$this->db_group_name2}->select_db("dormdatabase", $con);
+   $this->{$this->db_group_name2}->query("DELETE FROM Resident WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM Scholarship WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM Custodian WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM Hobbies WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM Honorsreceived WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM residentkey WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM residentloginfo WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM violation WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM scholarship WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM talent WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM payment WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		$this->{$this->db_group_name2}->query("DELETE FROM reservation WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
 		
-		mysql_select_db("dormdatabase", $con);
-		mysql_query("DELETE FROM Resident WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'")or die("Can't Delete ".mysql_error());
-		mysql_query("DELETE FROM Scholarship WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
-		mysql_query("DELETE FROM Custodian WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
-		mysql_query("DELETE FROM Hobbies WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
-		mysql_query("DELETE FROM Honors WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
-		mysql_query("DELETE FROM residentkey WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
-		mysql_query("DELETE FROM residentloginfo WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
-		mysql_query("DELETE FROM violation WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
-		
-		mysql_close($con);
+		//$this->{$this->db_group_name2}->close($con);
 		
 		
 	}
- 
+	
+   function delete_transient($fname,$lname,$mname){
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+         $this->{$this->db_group_name2}->query("DELETE FROM Transient WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+	}
+   function view_entryT($arrcol,$fname,$lname,$mname){
+   		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	$query = "<table class='view_trans'>";
+		$result = $this->{$this->db_group_name2}->query("SELECT * FROM transient	
+		WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
+		
+	foreach($result->result_array() as $row )
+  		{ 
+		foreach($arrcol as $q){
+			if(trim($row[$q])!=""){
+ 				$title = $q;
+				
+				if($q=="ControlNumber") $title = "Control Number";
+				else if($q=="FillUpDate") $title = "Fill Up Date";
+				else if($q=="LastName") $title = "Last Name";
+				else if($q=="FirstName") $title = "First Name";
+				else if($q=="MidName") $title = "Middle Name";
+				else if($q=="TCheckIn") $title = "Time Check In";
+				else if($q=="TCheckOut") $title = "Time Check Out";
+				else if($q=="RoomAssign") $title = "Room Assignment";
+				else if($q=="OrNum") $title = "OR Number";
+				else if($q=="AmountPaid") $title = "Amount Paid";
+				$item = ucwords(strtolower($row[$q]));
+				$query.="<tr><td class=\"field\">".$title.":</td><td>".$item."</td></tr>"; 
+			}
+			
+		}
+   }
+   return $query."</table>";
+   }
 	
    function view_entry($table,$arrcol,$fname,$lname,$mname){
-		
-		$con = mysql_connect("localhost","DORMA","dorm");
-		
-		mysql_select_db("dormdatabase", $con);
-		
-		
-		
-		$query = "<table class='view_resi'>";
-		$result = mysql_query("SELECT * FROM $table	
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	$query = "<table class='view_resi'>";
+		$result = $this->{$this->db_group_name2}->query("SELECT * FROM $table	
 		WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
 	
-	while($row = mysql_fetch_array($result))
+	foreach($result->result_array() as $row )
   		{ 
  		foreach($arrcol as $q){
  			if(trim($row[$q])!=""){
@@ -225,15 +292,35 @@ class Residentmodel extends CI_Model {
  				$query.="<tr><td class=\"field\">".$title.":</td><td>".$item."</td></tr>"; 
  			}
  		} 
-  	//$query .= "<tr><td>&nbsp</td></tr>";
+		
   	}	
 		
 	return $query."</table>";
 			
 	}
 	
-   function add_entry($_POST){
-   		$str="";
+   function editT($arrTrans,$_GET){
+   	$fname =$_GET["fname"];
+   	$mname =$_GET["mname"];
+   	$lname =$_GET["lname"];
+
+   
+   	$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    $query = "SELECT * from transient where FirstName = '$fname' and MidName = '$mname' and LastName = '$lname'";		
+    $result = $this->{$this->db_group_name2}->query($query); 	
+   	$arr = "";	
+   	
+    foreach($result->result() as $row){
+   			foreach($arrTrans as $at){
+   			$arr[$at] = $row->$at;
+   			}
+   		
+    	}
+    	return $arr ; 
+   }
+	
+   function add_transientEntry($_POST){
+		$str="";
    		$arrayKeys = array_keys($_POST);
 		$arrayValues = array_values($_POST);
 		for($i=0;$i<count($arrayValues);$i++){
@@ -247,58 +334,99 @@ class Residentmodel extends CI_Model {
 			}
 		}
 		
-   		$con = mysql_connect("localhost","DORMA","dorm");
-		if($_POST["roomSem1"]!=""){
-			$RoomNumber=$_POST["roomSem1"];
-		}else if($_POST["roomSem2"]!=""){
-				$RoomNumber=$_POST["roomSem2"];
-			
-		}else if($_POST["roomSemS"]!=""){
-				$RoomNumber=$_POST["roomSemS"];
-			
-		}else{	$RoomNumber="";}
-	
-	if (!$con){
-
-			die('Could not connect: '.mysql_error());
-		}
+		if(isset($_POST['submitTransient'])){
+			$vc  = new Residentmodel;
 		
-		mysql_select_db("dormdatabase",$con);
-
+			$_SESSION["newResidentInfo"]= "New Transient Added<br/>";
+			
+			$checkIn = $_POST["MonthIn"]."/".$_POST["DayIn"]."/".$_POST["YearIn"];
+			$checkOut = $_POST["MonthOut"]."/".$_POST["DayOut"]."/".$_POST["YearOut"];
+			$co = str_replace("/","",$checkOut);
+			$co = str_replace("0","",$co);
+			
+			if($co ==""){
+				$checkOut ="";
+			}
+			
+			
+			$sql = "Insert into transient values
+					('$_POST[ControlNum]',
+					'$_POST[Date]',
+					'$_POST[lastname]',
+					'$_POST[firstname]',
+					'$_POST[middlename]',
+					'$_POST[purpose]',
+					'$_POST[Emergency]',
+					'$_POST[dormName]',
+					'$checkIn',
+					'$_POST[tcheckin]',
+					'$checkOut',
+					'$_POST[tcheckout]',
+					'$_POST[bedding]',
+					'$_POST[roomassign]',
+					'$_POST[ornum]',
+					'$_POST[guarantor]',
+					'$_POST[type]',
+					'$_POST[rates]',
+					'$_POST[amount]',
+					$_POST[MonthIn]					
+					)";
+			
+			$this->{$this->db_group_name2}->query($sql);
+		}
+		$_SESSION["trans"] = "Transient Added!<br/>";
+	}
+   function add_entry($_POST){
+   		
+   		$str="";
+   		$fname = $_POST["firstname"]; 
+		$mname = $_POST["middlename"]; 
+		$lname = $_POST["lastname"];
+		
+$sql = "SELECT LastName from resident where LastName = '$lname' and MidName = '$mname' and FirstName = '$fname'";		
+  $result= $this->{$this->db_group_name2}->query($sql);	
+	$temp ="";	
+  foreach($result->result() as $row){
+			$temp =  "Resident not added!<br/>$fname $mname $lname is already on the record!";
+		}
+  	if($temp!=""){
+  		return $temp;
+  	}
+  	
+  	$arrayKeys = array_keys($_POST);
+		$arrayValues = array_values($_POST);
+		for($i=0;$i<count($arrayValues);$i++){
+			if($arrayValues[$i]!=""){
+		
+			$_POST["$arrayKeys[$i]"]=strtoupper($arrayValues[$i]);
+			
+			}else{
+				$_POST["$arrayKeys[$i]"]="";
+			
+			}
+		}
 
 		if(isset($_POST['submitResident'])){
 
 		$vc  =new Residentmodel;
-		$opt = new OptionClass;
-$str.= "New Resident Added<br/>";
-$str.= "Name: $_POST[firstname] $_POST[middlename] $_POST[lastname]<br/>";
+		//$this->Optionmodel = new OptionClass;
+$str.= "<h3>New Resident Added</h3>";
+$str.= "Name: $_POST[firstname] $_POST[middlename] $_POST[lastname]<br/><hr/><br/>";
 		
 	
 $Bday = $_POST["Month"]."/".$_POST["Day"]."/".$_POST["Year"];		
 $StudentNumber = trim($_POST["Batch"]."-".$_POST["StudNumber"]);
-$form ="";
-if ($_POST["dateInSem1"] != ""){
-	$checkIn = $_POST["dateInSem1"];
-	$form =  $_POST["formSem1"];
-}
-else if ($_POST["dateInSem2"] != ""){
-	$checkIn = $_POST["dateInSem2"];
-	$form =  $_POST["formSem2"];
-}
-else if ($_POST["dateInSemS"] != ""){
-	$checkIn = $_POST["dateInSemS"];
-	$form =  $_POST["formSemS"];
-}
-$checkOut="";/*
-if ($_POST["dateOutSem1"] != ""){
-	$checkOut = $_POST["dateOutSem1"];
-}
-else if ($_POST["dateOutSem2"] != ""){
-	$checkOut = $_POST["dateOutSem2"];
-}
-else if ($_POST["dateOutSemS"] != ""){
-	$checkOut = $_POST["dateOutSemS"];
-}*/
+$form =$_POST["form5"];
+ $sql = "SELECT LastName from resident where StudentNumber  ='$StudentNumber'";		
+  $result= $this->{$this->db_group_name2}->query($sql);	
+	
+   $temp ="";	
+  foreach($result->result() as $row){
+			$temp =  "Resident not added!<br/>$fname $mname $lname's student number ($StudentNumber) is already on the record!";
+		}
+  	if($temp!=""){
+  		return $temp;
+  	}
 
 
 $sql = "Insert into Resident
@@ -327,11 +455,11 @@ $sql = "Insert into Resident
 		'$_POST[bfgf]', 
 		'$_POST[college]', 
 		'$_POST[Age]', 
-		'$RoomNumber')";
-	mysql_query($sql) or die( "resident".mysql_error());	
+		'$_POST[room]')";
+		 $this->{$this->db_group_name2}->query($sql);	
 
-$arrcol = $opt->returnFieldsArray("resident");
-$str.=$opt->viewTable("resident",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
+$arrcol = $this->Optionmodel->returnFieldsArray("resident");
+$str.=$this->Optionmodel->viewTable("resident",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
 	
 if(isset($_POST["Scholarship"])&&trim($_POST["Scholarship"])!=""){
 	
@@ -343,35 +471,35 @@ if(isset($_POST["Scholarship"])&&trim($_POST["Scholarship"])!=""){
 		'$_POST[Scholarship]', 
 		'$_POST[MonthlyStipend]' )";
 			
-mysql_query($sql) or die( "Scholarship".mysql_error());
-$arrcol = $opt->returnFieldsArray("Scholarship");
-$str.= $opt->viewTable("Scholarship",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
+ $this->{$this->db_group_name2}->query($sql);
+$arrcol = $this->Optionmodel->returnFieldsArray("Scholarship");
+$str.= $this->Optionmodel->viewTable("Scholarship",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
 }
 
 if(isset($_POST["Honors"])&&trim($_POST["Honors"])!=""){
 	
 	$sql = "Insert into honorsreceived
 		Values(
-		'$_POST[lastname]', , 
+		'$_POST[lastname]',
 		'$_POST[middlename]', 
 		'$_POST[firstname]', 
 		'$_POST[Honors]' )";
-mysql_query($sql) or die( "honors".mysql_error());
-$arrcol = $opt->returnFieldsArray("honorsreceived");
-$str.= $opt->viewTable("honorsreceived",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
+$this->{$this->db_group_name2}->query($sql);
+$arrcol = $this->Optionmodel->returnFieldsArray("honorsreceived");
+$str.= $this->Optionmodel->viewTable("honorsreceived",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
 }
 
 if(isset($_POST["HobbyName"])&&trim($_POST["HobbyName"])!=""){
 	
 	$sql = "Insert into Hobbies
 		Values(
-		'$_POST[lastname]', , 
+		'$_POST[lastname]',
 		'$_POST[middlename]', 
 		'$_POST[firstname]', 
 		'$_POST[HobbyName]' )";
-mysql_query($sql) or die( "Hobbyname".mysql_error());
-$arrcol = $opt->returnFieldsArray("Hobbies");
-$str.= $opt->viewTable("Hobbies",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
+$this->{$this->db_group_name2}->query($sql) ;
+$arrcol = $this->Optionmodel->returnFieldsArray("Hobbies");
+$str.= $this->Optionmodel->viewTable("Hobbies",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
 
 }
 
@@ -379,14 +507,14 @@ if(isset($_POST["otherSourcesOfIncome"])&&trim($_POST["otherSourcesOfIncome"])!=
 	
 	$sql = "Insert into othersourcesincome
 		Values(
-		'$_POST[lastname]', , 
+		'$_POST[lastname]', 
 		'$_POST[middlename]', 
 		'$_POST[firstname]', 
 		'$_POST[otherSourcesOfIncome]', 
 		'$_POST[otherIncomeAmount]' )";
-mysql_query($sql) or die( "other".mysql_error());
-$arrcol = $opt->returnFieldsArray("othersourcesincome");
-$str.= $opt->viewTable("othersourcesincome",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
+$this->{$this->db_group_name2}->query($sql);
+$arrcol = $this->Optionmodel->returnFieldsArray("othersourcesincome");
+$str.= $this->Optionmodel->viewTable("othersourcesincome",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
 
 }
 
@@ -394,13 +522,13 @@ if(isset($_POST["Org"])&&trim($_POST["Org"])!=""){
 	
 	$sql = "Insert into Org
 		Values(
-		'$_POST[lastname]', , 
+		'$_POST[lastname]',
 		'$_POST[middlename]', 
 		'$_POST[firstname]', 
 		'$_POST[Org]' )";
-mysql_query($sql) or die( "org".mysql_error());
-$arrcol = $opt->returnFieldsArray("org");
-$str.= $opt->viewTable("org",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
+$this->{$this->db_group_name2}->query($sql);
+$arrcol = $this->Optionmodel->returnFieldsArray("org");
+$str.= $this->Optionmodel->viewTable("org",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
 
 }
 
@@ -408,13 +536,13 @@ if(isset($_POST["radio_ctr1"])&&trim($_POST["radio_ctr1"])!=""){
 	
 	$sql = "Insert into othersourcesincome
 		Values(
-		'$_POST[lastname]', , 
+		'$_POST[lastname]', 
 		'$_POST[middlename]', 
 		'$_POST[firstname]', 
 		'$_POST[radio_ctr1]' )";
-mysql_query($sql) or die( "org".mysql_error());
-$arrcol = $opt->returnFieldsArray("othersourcesincome");
-$str.= $opt->viewTable("othersourcesincome",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
+$this->{$this->db_group_name2}->query($sql);
+$arrcol = $this->Optionmodel->returnFieldsArray("othersourcesincome");
+$str.= $this->Optionmodel->viewTable("othersourcesincome",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
 
 }
 if($_POST["cg1name"]!=""&&$_POST["cg2name"]!=""&&$_POST["cfname"]!=""&&$_POST["cfname"]!=""){
@@ -444,77 +572,40 @@ $sql = "Insert into Custodian
 		'$_POST[cmliving] ', 
 		'$_POST[marriageStatus]' )";
 
-mysql_query($sql) or die( "custodian".mysql_error());
-$arrcol = $opt->returnFieldsArray("Custodian");
-$str.= $opt->viewTable("Custodian",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
+$this->{$this->db_group_name2}->query($sql);
+$arrcol = $this->Optionmodel->returnFieldsArray("Custodian");
+$str.= $this->Optionmodel->viewTable("Custodian",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
 }
 
 }
 
 
-if ($_POST["OrNum1"] != ""){
-	$sem = 1;
-	$date = $_POST["Date1"];
-	$orNum = $_POST["OrNum1"];
-	$amount = $_POST["Amount1"];
-	$remarks = $_POST["Remarks1"];
-}
-else if ($_POST["OrNum2"] != ""){
-	$sem = 2;
-	$date = $_POST["Date2"];
-	$orNum = $_POST["OrNum2"];
-	$amount = $_POST["Amount2"];
-	$remarks = $_POST["Remarks2"];
-}
-else if ($_POST[OrNum3] != ""){
-	$sem = 'S';
-	$date = $_POST["Date3"];
-	$orNum = $_POST["OrNum3"];
-	$amount = $_POST["Amount3"];
-	$remarks = $_POST["Remarks3"];
-}
 
+
+$getTerm = "Select Term from dorm";
+$t = $this->{$this->db_group_name2}->query($getTerm);
+
+foreach($t->result() as $row)
+	$term = $row->Term;
+
+$date = $_POST["MonthR"]."/".$_POST["DayR"]."/".$_POST["YearR"];	
+	
 $sql = "insert into reservation
 		values (
 		'$_POST[lastname]',
 		'$_POST[middlename]', 
 		'$_POST[firstname]',
-		'$sem',
-		'$orNum', 
-		'$amount',
-		'$remarks',
+		'$term',
+		'$_POST[OrNum]', 
+		'$_POST[Amount]',
+		'$_POST[Remarks]',
 		'$date')";
 
-mysql_query($sql) or die( "Reservation".mysql_error());
+$this->{$this->db_group_name2}->query($sql);
 
 
-if ($_POST["OrNumKey1"] != ""){
-	$term = "1";
-	$date = $_POST["Date1"];
-	$orNum = $_POST["OrNumKey1"];
-	$amount = $_POST["AmountKey1"];
-	$dateReceived = $_POST["dateReceived1"];
-	$dateReturned = $_POST["dateReturned1"];
-	$remarks = $_POST["RemarksKey1"];
-}
-else if ($_POST["OrNumKey2"] != ""){
-	$term = "2";
-	$date = $_POST["Date2"];
-	$orNum = $_POST["OrNumKey2"];
-	$amount = $_POST["AmountKey2"];
-	$dateReceived = $_POST["dateReceived2"];
-	$dateReturned = $_POST["dateReturned2"];
-	$remarks = $_POST["RemarksKey2"];
-}
-else if ($_POST["OrNumKeyS"] != ""){
-	$term = "S";
-	$date = $_POST["DateS"];
-	$orNum = $_POST["OrNumKeyS"];
-	$amount = $_POST["AmountKeyS"];
-	$dateReceived = $_POST["dateReceivedS"];
-	$dateReturned = $_POST["dateReturnedS"];
-	$remarks = $_POST["RemarksKeyS"];
-}
+$dateReceived = $_POST["MonthRec"]."/".$_POST["DayRec"]."/".$_POST["YearRec"];	
+$dateReturned = $_POST["MonthRet"]."/".$_POST["DayRet"]."/".$_POST["YearRet"];	
 
 $sql = "insert into residentkey
 		values (
@@ -522,36 +613,49 @@ $sql = "insert into residentkey
 		'$_POST[middlename]', 
 		'$_POST[firstname]',
 		'$term',
-		'$orNum',
-		'$amount',
+		'$_POST[OrNumKey]',
+		'$_POST[AmountKey]',
 		'$dateReceived',
 		'$dateReturned',
-		'$remarks')";
-mysql_query($sql) or die( "Key".mysql_error());
+		'$_POST[RemarksKey]')";
+$this->{$this->db_group_name2}->query($sql);
 
-	$sql = "Insert into residentloginfo
+
+$checkIn = $_POST["MonthLI1"]."/".$_POST["DayLI1"]."/".$_POST["YearLI1"];	
+$checkOut = $_POST["MonthLI2"]."/".$_POST["DayLI2"]."/".$_POST["YearLI2"];	
+if(str_replace("/","",$checkOut)==""){
+	$checkOut ="";
+}
+
+$sql = "Insert into residentloginfo
 		Values(
 		'$_POST[lastname]',
 		'$_POST[middlename]', 
 		'$_POST[firstname]', 
 		'$checkIn',
 		'$checkOut',
-		'$form',
-		'$RoomNumber',
+		'$_POST[form5]',
+		'$_POST[room]',
 		'$term' )";
-mysql_query($sql) or die( "loginfo".mysql_error());
-$arrcol = $opt->returnFieldsArray("residentloginfo");
-$str.= $opt->viewTable("residentloginfo",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
+$this->{$this->db_group_name2}->query($sql);
+$arrcol = $this->Optionmodel->returnFieldsArray("residentloginfo");
+$str.= $this->Optionmodel->viewTable("residentloginfo",$arrcol,$_POST["firstname"],$_POST["lastname"],$_POST["middlename"]);
    
 if(isset($_SESSION["numApp"])){
 	$numApp= $_SESSION["numApp"]-1;
-	echo $numApp."<br/>";
+	//echo $numApp."<br/>";
 	if($numApp>0){
 		$cnt = 0;
 	
 		for($cnt=0;$cnt<$numApp;$cnt++){
+			
+			
 		$appName = $_POST["ApplianceName".$cnt];
+		
+		$_POST["dateInstalled".$cnt] = $_POST["dateInstalledMonth".$cnt]."/".$_POST["dateInstalledDay".$cnt]."/".$_POST["dateInstalledYear".$cnt];
+		
 		$dateInstalled = $_POST["dateInstalled".$cnt];
+		
 		$cnum = $_POST["controlNum".$cnt];
 		if(strtoupper($appName)!="NONE"&&$appName!=""&&$cnum!=""&&$cnum!=0){	
 		$sql = "Insert into Appliances(LastName,FirstName,MidName,AppName,DateInstalled,CTRLNum,RumNum)
@@ -562,27 +666,28 @@ if(isset($_SESSION["numApp"])){
 	    '$appName',
 	    '$dateInstalled',
 	    '$cnum',
-	    '$RoomNumber'
+	    '$_POST[room]'
 	    )";
-		mysql_query($sql) or die( "App ".mysql_error());
+		$this->{$this->db_group_name2}->query($sql);
 		}
 		
 		}
 	}
 }
 
-mysql_close($con);
+
 		
 return $str;		
 }
    function getDateCheckIn($fname,$mname,$lname){
-					$this->load->database();
-					$this->db->select('DateCheckIn, DateCheckOut');
-					$this->db->where('LastName', $lname);
-					$this->db->where('FirstName', $fname);
-					$this->db->where('MidName', $mname);
-					$this->db->from('residentloginfo');
-					$log = $this->db->get();
+					$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+					$this->{$this->db_group_name2}->select('DateCheckIn, DateCheckOut');
+					$this->{$this->db_group_name2}->where('LastName', $lname);
+					$this->{$this->db_group_name2}->where('FirstName', $fname);
+					$this->{$this->db_group_name2}->where('MidName', $mname);
+					$this->{$this->db_group_name2}->from('residentloginfo');
+					$log = $this->{$this->db_group_name2}->get();
 					$in = "";
   					foreach ($log->result() as $row)
 					{	
@@ -593,17 +698,38 @@ return $str;
 					}
 			return $in;
 	}
+	
+   function getTransientRate($fname,$mname,$lname){
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+					$this->{$this->db_group_name2}->select('Rates');
+					$this->{$this->db_group_name2}->where('LastName', $lname);
+					$this->{$this->db_group_name2}->where('FirstName', $fname);
+					$this->{$this->db_group_name2}->where('MidName', $mname);
+					$this->{$this->db_group_name2}->from('transient');
+					$log = $this->{$this->db_group_name2}->get();
+					$rate = "";
+  					foreach ($log->result() as $row)
+					{	
+						
+							$rate =$row->Rates; 
+						
+						
+					}
+			return $rate;
+	}
 
-	function getApp($fname,$mname,$lname){
+   function getApp($fname,$mname,$lname){
   					$arr = "";
 
-  					$this->load->database();
-					$this->db->select('AppName,DateInstalled,DateCancelled');
-					$this->db->where('LastName', $lname);
-					$this->db->where('FirstName', $fname);
-					$this->db->where('MidName', $mname);
-					$this->db->from('appliances');
-					$app = $this->db->get();
+  					  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+					$this->{$this->db_group_name2}->select('AppName,DateInstalled,DateCancelled');
+					$this->{$this->db_group_name2}->where('LastName', $lname);
+					$this->{$this->db_group_name2}->where('FirstName', $fname);
+					$this->{$this->db_group_name2}->where('MidName', $mname);
+					$this->{$this->db_group_name2}->from('appliances');
+					$app = $this->{$this->db_group_name2}->get();
   					$cnt =0;
 					foreach ($app->result() as $row)
 					{	if($row->DateCancelled==""){
@@ -616,11 +742,12 @@ return $str;
   	}
    function getAppRecords(){
   					$arr = "";
-  					$this->load->database();
-					$this->db->select('*');
-					$this->db->from('appliances');
-					$this->db->order_by("LastName","asc");
-					$app = $this->db->get();
+  					  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+					$this->{$this->db_group_name2}->select('*');
+					$this->{$this->db_group_name2}->from('appliances');
+					$this->{$this->db_group_name2}->order_by("LastName","asc");
+					$app = $this->{$this->db_group_name2}->get();
   					$cnt =0;
 					foreach ($app->result() as $row)
 					{	
@@ -632,21 +759,22 @@ return $str;
 
    function setBalanceFromPay($fname,$mname,$lname){
  			 		$bool = false;
-  					$this->load->database();
-					$this->db->select('Total');
-					$this->db->where('LastName', $lname);
-					$this->db->where('FirstName', $fname);
-					$this->db->where('MidName', $mname);
-					$this->db->from('balance');
-					$bal = $this->db->get();
+  					  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+					$this->{$this->db_group_name2}->select('Total');
+					$this->{$this->db_group_name2}->where('LastName', $lname);
+					$this->{$this->db_group_name2}->where('FirstName', $fname);
+					$this->{$this->db_group_name2}->where('MidName', $mname);
+					$this->{$this->db_group_name2}->from('balance');
+					$bal = $this->{$this->db_group_name2}->get();
 					
 					
-					$this->db->select('DormFee,AppFee,TransFee');
-					$this->db->where('LastName', $lname);
-					$this->db->where('FirstName', $fname);
-					$this->db->where('MidName', $mname);
-					$this->db->from('payment');
-					$pay = $this->db->get();
+					$this->{$this->db_group_name2}->select('DormFee,AppFee,TransFee');
+					$this->{$this->db_group_name2}->where('LastName', $lname);
+					$this->{$this->db_group_name2}->where('FirstName', $fname);
+					$this->{$this->db_group_name2}->where('MidName', $mname);
+					$this->{$this->db_group_name2}->from('payment');
+					$pay = $this->{$this->db_group_name2}->get();
 					if(count($pay->result())>0&&count($bal->result())>0){
 					$df="";
 					$af="";
@@ -676,10 +804,10 @@ return $str;
 						$diff = bcsub($totalBal ,$totalPay);
 						$diff."</br>";
 						if($diff<=0){
-								$this->db->where('LastName', $lname);
-								$this->db->where('FirstName', $fname);
-								$this->db->where('MidName', $mname);
-								$this->db->delete('balance');
+								$this->{$this->db_group_name2}->where('LastName', $lname);
+								$this->{$this->db_group_name2}->where('FirstName', $fname);
+								$this->{$this->db_group_name2}->where('MidName', $mname);
+								$this->{$this->db_group_name2}->delete('balance');
 							}else{
 								$bool = true;
 							}
@@ -693,13 +821,14 @@ return $str;
   	
    function setBalance($fname,$mname,$lname,$period,$residentFee,$appFee,$total){
 					
-					$this->load->database();
-					$this->db->select('FirstName,LastName');
-					$this->db->where('LastName', $lname);
-					$this->db->where('FirstName', $fname);
-					$this->db->where('MidName', $mname);
-					$this->db->from('balance');
-					$bal = $this->db->get();
+					  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+					$this->{$this->db_group_name2}->select('FirstName,LastName');
+					$this->{$this->db_group_name2}->where('LastName', $lname);
+					$this->{$this->db_group_name2}->where('FirstName', $fname);
+					$this->{$this->db_group_name2}->where('MidName', $mname);
+					$this->{$this->db_group_name2}->from('balance');
+					$bal = $this->{$this->db_group_name2}->get();
 					
 				if(count($bal->result())<1){
 					$data = array(
@@ -712,7 +841,7 @@ return $str;
 							'Total' => "$total"
 							
 					);	
-					$this->db->insert('balance', $data);
+					$this->{$this->db_group_name2}->insert('balance', $data);
 				}else{
 					$data = array(
            		 			'PeriodCovered' => "$period",
@@ -721,10 +850,10 @@ return $str;
 							'Total' => "$total"
 							
 					);
-					$this->db->where('LastName', $lname);
-					$this->db->where('FirstName', $fname);
-					$this->db->where('MidName', $mname);
-					$this->db->update('balance', $data); 
+					$this->{$this->db_group_name2}->where('LastName', $lname);
+					$this->{$this->db_group_name2}->where('FirstName', $fname);
+					$this->{$this->db_group_name2}->where('MidName', $mname);
+					$this->{$this->db_group_name2}->update('balance', $data); 
 					
 				}
 
@@ -732,185 +861,209 @@ return $str;
 	}
   
    function tally_resident($temp){
-		$con = mysql_connect("localhost","DORMA","dorm");
-		mysql_select_db("dormdatabase", $con);
+		//$con = $this->{$this->db_group_name2}->connect("localhost","DORMA","dorm");
+		//$this->{$this->db_group_name2}->select_db("dormdatabase", $con);
+	$arr = "";	
+	
+   	$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	$sql = "Select Count(*) from Resident";
+     	 $ar= $this->{$this->db_group_name2}->query($sql)->result();
+    	
+    	$ar = (array)$ar[0];
+    
+    	$ar = array_values($ar);
+    	
+    	
+    	if($ar[0]>0){
 		
-		$sql = "Select Count(*) from Resident where Gender='MALE'";
-		$result[0] = mysql_query($sql) or die("tally".mysql_error());
+    	 $sql = "Select Count(*) from Resident where Gender='MALE'";
+		
+    	$result[0] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 
 		$sql = "Select Count(*) from Resident where Gender='FEMALE'";
-		$result[1] = mysql_query($sql) or die("tally".mysql_error());
+		$result[1] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Classification = 'FRESHMAN'";
-		$result[2] = mysql_query($sql) or die("tally".mysql_error());
+		$result[2] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Classification = 'FRESHMAN'";
-		$result[3] = mysql_query($sql) or die("tally".mysql_error());
+		$result[3] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Classification = 'SOPHOMORE'";
-		$result[4] = mysql_query($sql) or die("tally".mysql_error());
+		$result[4] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Classification = 'SOPHOMORE'";
-		$result[5] = mysql_query($sql) or die("tally".mysql_error());
+		$result[5] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Classification = 'JUNIOR'";
-		$result[6] = mysql_query($sql) or die("tally".mysql_error());
+		$result[6] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Classification = 'JUNIOR'";
-		$result[7] = mysql_query($sql) or die("tally".mysql_error());
+		$result[7] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Classification = 'SENIOR'";
-		$result[8] = mysql_query($sql) or die("tally".mysql_error());
+		$result[8] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Classification = 'SENIOR'";
-		$result[9] = mysql_query($sql) or die("tally".mysql_error());
+		$result[9] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		if($temp==1){
 		$sql = "Select Count(*) from Resident where College = 'CA'";
-		$result[10] = mysql_query($sql) or die("tally".mysql_error());
+		$result[10] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where College = 'CAS'";
-		$result[11] = mysql_query($sql) or die("tally".mysql_error());
+		$result[11] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where College = 'CA-CAS'";
-		$result[12] = mysql_query($sql) or die("tally".mysql_error());
+		$result[12] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where College = 'CDC'";
-		$result[13] = mysql_query($sql) or die("tally".mysql_error());
+		$result[13] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where College = 'CEAT'";
-		$result[14] = mysql_query($sql) or die("tally".mysql_error());
+		$result[14] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where College = 'CEM'";
-		$result[15] = mysql_query($sql) or die("tally".mysql_error());
+		$result[15] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where College = 'CFNR'";
-		$result[16] = mysql_query($sql) or die("tally".mysql_error());
+		$result[16] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where College = 'CHE'";
-		$result[17] = mysql_query($sql) or die("tally".mysql_error());
+		$result[17] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where College = 'CVM'";
-		$result[18] = mysql_query($sql) or die("tally".mysql_error());
+		$result[18] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONI'";
-		$result[19] = mysql_query($sql) or die("tally".mysql_error());
+		$result[19] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONI'";
-		$result[20] = mysql_query($sql) or die("tally".mysql_error());
+		$result[20] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONII'";
-		$result[21] = mysql_query($sql) or die("tally".mysql_error());
+		$result[21] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONII'";
-		$result[22] = mysql_query($sql) or die("tally".mysql_error());
+		$result[22] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONIII'";
-		$result[23] = mysql_query($sql) or die("tally".mysql_error());
+		$result[23] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONIII'";
-		$result[24] = mysql_query($sql) or die("tally".mysql_error());
+		$result[24] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and (Region = 'REGIONIV-A' or Region = 'REGIONIV-B')";
-		$result[25] = mysql_query($sql) or die("tally".mysql_error());
+		$result[25] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and (Region = 'REGIONIV-A' or Region = 'REGIONIV-B')";
-		$result[26] = mysql_query($sql) or die("tally".mysql_error());
+		$result[26] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONV'";
-		$result[27] = mysql_query($sql) or die("tally".mysql_error());
+		$result[27] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONV'";
-		$result[28] = mysql_query($sql) or die("tally".mysql_error());
+		$result[28] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONVI'";
-		$result[29] = mysql_query($sql) or die("tally".mysql_error());
+		$result[29] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONVI'";
-		$result[30] = mysql_query($sql) or die("tally".mysql_error());
+		$result[30] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONVII'";
-		$result[31] = mysql_query($sql) or die("tally".mysql_error());
+		$result[31] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONVII'";
-		$result[32] = mysql_query($sql) or die("tally".mysql_error());
+		$result[32] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONVIII'";
-		$result[33] = mysql_query($sql) or die("tally".mysql_error());
+		$result[33] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONVIII'";
-		$result[34] = mysql_query($sql) or die("tally".mysql_error());
+		$result[34] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONIX'";
-		$result[35] = mysql_query($sql) or die("tally".mysql_error());
+		$result[35] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONIX'";
-		$result[36] = mysql_query($sql) or die("tally".mysql_error());
+		$result[36] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONX'";
-		$result[37] = mysql_query($sql) or die("tally".mysql_error());
+		$result[37] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONX'";
-		$result[38] = mysql_query($sql) or die("tally".mysql_error());
+		$result[38] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONXI'";
-		$result[39] = mysql_query($sql) or die("tally".mysql_error());
+		$result[39] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONXI'";
-		$result[40] = mysql_query($sql) or die("tally".mysql_error());
+		$result[40] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONXII'";
-		$result[41] = mysql_query($sql) or die("tally".mysql_error());
+		$result[41] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONXII'";
-		$result[42] = mysql_query($sql) or die("tally".mysql_error());
+		$result[42] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'REGIONXIII'";
-		$result[43] = mysql_query($sql) or die("tally".mysql_error());
+		$result[43] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'REGIONXIII'";
-		$result[44] = mysql_query($sql) or die("tally".mysql_error());
+		$result[44] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'NCR'";
-		$result[45] = mysql_query($sql) or die("tally".mysql_error());
+		$result[45] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'NCR'";
-		$result[46] = mysql_query($sql) or die("tally".mysql_error());
+		$result[46] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'CAR'";
-		$result[47] = mysql_query($sql) or die("tally".mysql_error());
+		$result[47] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'CAR'";
-		$result[48] = mysql_query($sql) or die("tally".mysql_error());
+		$result[48] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'CARAGA'";
-		$result[49] = mysql_query($sql) or die("tally".mysql_error());
+		$result[49] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'CARAGA'";
-		$result[50] = mysql_query($sql) or die("tally".mysql_error());
+		$result[50] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'MALE' and Region = 'ARMM'";
-		$result[51] = mysql_query($sql) or die("tally".mysql_error());
+		$result[51] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
 		$sql = "Select Count(*) from Resident where Gender = 'FEMALE' and Region = 'ARMM'";
-		$result[52] = mysql_query($sql) or die("tally".mysql_error());
-		}
-		$arr;
-		for($i = 0; $i < count($result); $i++){
-			$arr[$i] = mysql_result($result[$i],0);
-		}
+		$result[52] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
 		
+		$sql = "Select MaleOccupant from dorm";
+		$result[53] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
+		
+		$sql = "Select FemaleOccupant from dorm";
+		$result[54] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
+		
+		}
+		for($i = 0; $i < count($result); $i++){
+			$ar = $result[$i]->result();
+			
+    		 $ar = (array)$ar[0];
+    		 $ar = array_values($ar);
+    		$arr[$i] = $ar[0];
+		}
+    	}
 		return $arr;
 	}
    
    function createBalanceTable($fname,$lname,$mname){
 		
-					$this->load->database();
-					$this->db->select('PeriodCovered,ResidentFee,Appfee,TransFee,Total');
-					$this->db->where('LastName', $lname);
-					$this->db->where('FirstName', $fname);
-					$this->db->where('MidName', $mname);
-					$this->db->from('balance');
-					$bal = $this->db->get();
+					  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+					$this->{$this->db_group_name2}->select('PeriodCovered,ResidentFee,Appfee,TransFee,Total');
+					$this->{$this->db_group_name2}->where('LastName', $lname);
+					$this->{$this->db_group_name2}->where('FirstName', $fname);
+					$this->{$this->db_group_name2}->where('MidName', $mname);
+					$this->{$this->db_group_name2}->from('balance');
+					$bal = $this->{$this->db_group_name2}->get();
 				$table="<table class=\"balance_table\">";
 				$table.="<tr><th>PeriodCovered</th><th>Resident Fee</th><th>AppFee Fee</th><th>Trans Fee</th><th>Total</th></tr>";	
 				foreach($bal->result() as $b){
@@ -929,7 +1082,7 @@ return $str;
 }
    
    function queryThis($q,$id){
-   	  $query = $this->db->query($q);
+   	  $query = $this->{$this->db_group_name2}->query($q);
 	  $arr = "";
 	  $cnt = 0;
 	  foreach($query->result() as $row  ){
@@ -944,14 +1097,15 @@ return $str;
    }
   
    function viewCustodian($arrcol,$fname,$lname,$mname){
-		$this->load->database();
+		  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
 		
-		$query = mysql_query("SELECT * FROM Custodian	
+		$query =  $this->{$this->db_group_name2}->query("SELECT * FROM Custodian	
 			WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
 			
 		$result = "<table class=\"custodian_table\">";
 				
-		while($row = mysql_fetch_array($query))
+		foreach($query->result_array() as $row)
   		{ 
 			foreach($arrcol as $q){
 				if(trim($row[$q])!=""){
@@ -1004,19 +1158,20 @@ return $str;
 		return $result."</table>";
 	}	//end of viewCustodian
 	
-	function viewOtherInfo($arrcol1,$arrcol2,$arrcol3,$arrcol4,$arrcol5,$fname,$lname,$mname){
+   function viewOtherInfo($arrcol1,$arrcol2,$arrcol3,$arrcol4,$arrcol5,$fname,$lname,$mname){
 		
-		$this->load->database();
+		  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
 	
 		
 		/*	Scholarship	*/
-		$query = mysql_query("SELECT * FROM scholarship	
+		$query = $this->{$this->db_group_name2}->query("SELECT * FROM scholarship	
 			WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
 			
 		$result = "<table class=\"otherInfo_table\">";
 			
 				
-		while($row = mysql_fetch_array($query))
+		foreach($query->result() as $row)
   		{ 
 			
 			foreach($arrcol1 as $q){
@@ -1042,10 +1197,10 @@ return $str;
 		}
 		
 		/*	Honors	*/
-		$query = mysql_query("SELECT * FROM honorsreceived	
+		$query = $this->{$this->db_group_name2}->query("SELECT * FROM honorsreceived	
 			WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
 				
-		while($row = mysql_fetch_array($query))
+		foreach($query->result_array() as $row)
   		{ 
 			foreach($arrcol2 as $q){
 				if(trim($row[$q])!=""){
@@ -1066,10 +1221,10 @@ return $str;
 		}
 		
 		/*	Hobbies	*/
-		$query = mysql_query("SELECT * FROM hobbies	
+		$query = $this->{$this->db_group_name2}->query("SELECT * FROM hobbies	
 			WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
 				
-		while($row = mysql_fetch_array($query))
+		foreach($query->result() as $row)
   		{ 
 			foreach($arrcol3 as $q){
 				if(trim($row[$q])!=""){
@@ -1091,10 +1246,10 @@ return $str;
 		}
 		
 		/*	Other Sources of Income	*/
-		$query = mysql_query("SELECT * FROM othersourcesincome	
+		$query = $this->{$this->db_group_name2}->query("SELECT * FROM othersourcesincome	
 			WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
 				
-		while($row = mysql_fetch_array($query))
+		foreach($query->result_array() as $row)
   		{ 
 			foreach($arrcol4 as $q){
 				if(trim($row[$q])!=""){
@@ -1117,10 +1272,10 @@ return $str;
 		}
 		
 		/*	Org	*/
-		$query = mysql_query("SELECT * FROM org	
+		$query = $this->{$this->db_group_name2}->query("SELECT * FROM org	
 			WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
 				
-		while($row = mysql_fetch_array($query))
+		foreach($query->result_array() as $row)
   		{ 
 			foreach($arrcol5 as $q){
 				if(trim($row[$q])!=""){
@@ -1143,15 +1298,16 @@ return $str;
 		return $result."</table>";
 	}	//end of viewOtherInfo
 	
-	function viewAppliances($fname,$lname,$mname){
-		$this->load->database();
+   function viewAppliances($fname,$lname,$mname){
+		  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
 		
-		$this->db->select('CTRLNum, RumNum, AppName, Term, DateInstalled, DateCancelled, Remarks');
-		$this->db->where('LastName', $lname);
-		$this->db->where('FirstName', $fname);
-		$this->db->where('MidName', $mname);
-		$this->db->from('appliances');
-		$app = $this->db->get();
+		$this->{$this->db_group_name2}->select('CTRLNum, RumNum, AppName, Term, DateInstalled, DateCancelled, Remarks');
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->from('appliances');
+		$app = $this->{$this->db_group_name2}->get();
 		
 		$result = "
 					<form action=\"index.php?c=resident&m=updateApp\" method=\"POST\" name=\"checkOutApp\"\">
@@ -1168,19 +1324,19 @@ return $str;
 			
 			foreach ($app->result() as $row)
 			{	
-				$app = strtolower($row->AppName);
+				/*$app = strtolower($row->AppName);
 				if ($app == "ef") $app = "Electric Fan";
 				else if ($app == "cw/p") $app = "Computer w/ printer";
 				else if ($app == "cw/op") $app = "Computer w/o printer";
 				
-				$app = ucwords($app);
+				$app = ucwords($app);*/
 				
 				$_SESSION["appCtrlNum$cnt"] = $row->CTRLNum;
 				
 				$result.="<tr>";
 				$result.="<td>".$row->CTRLNum."</td>";
 				$result.="<td>".$row->RumNum."</td>";
-				$result.="<td>".$app."</td>";
+				$result.="<td>".$row->AppName."</td>";
 				$result.="<td>".$row->Term."</td>";
 				$result.="<td>".$row->DateInstalled."</td>";
 					
@@ -1204,7 +1360,7 @@ return $str;
 	}	//end of viewAppliances
 	
 	
-	function updateAppliance($_POST, $LastName, $MidName, $FirstName){
+   function updateAppliance($_POST, $LastName, $MidName, $FirstName){
 		$arrayKeys = array_keys($_POST);
 		$arrayValues = array_values($_POST);
 		
@@ -1219,7 +1375,8 @@ return $str;
 			}
 		}
 		
-		$this->load->database();
+		  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
 		
 		
 		$count = 0;
@@ -1236,8 +1393,8 @@ return $str;
 	       	$CTRLNum = $_SESSION["appCtrlNum$count"];
 	       	
 			
-			$this->db->where('CTRLNum', $CTRLNum);
-			$this->db->update('appliances', $data);
+			$this->{$this->db_group_name2}->where('CTRLNum', $CTRLNum);
+			$this->{$this->db_group_name2}->update('appliances', $data);
 			} 			
 		}
 		
@@ -1253,8 +1410,8 @@ return $str;
 	}	//end of updateAppliance
 	
 	
-	function updateResident($_POST, $fname, $lname, $mname){
-		$arrayKeys = array_keys($_POST);
+   function updateTransient($_POST,$fname,$mname,$lname){
+	$arrayKeys = array_keys($_POST);
 		$arrayValues = array_values($_POST);
 		
 		for($i=0;$i<count($arrayValues);$i++){
@@ -1268,13 +1425,66 @@ return $str;
 			}
 		}
 		
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+		
+		$checkIn = $_POST["MonthIn"]."/".$_POST["DayIn"]."/".$_POST["YearIn"];
+$checkOut = $_POST["MonthOut"]."/".$_POST["DayOut"]."/".$_POST["YearOut"];
+
+	$data = array(
+				'ControlNumber' => strtoupper($_POST["ControlNum"]),
+				'FillUpDate' => strtoupper($_POST["Date"]),
+				'LastName' => strtoupper($_POST["lastname"]),
+				'FirstName' => strtoupper($_POST["firstname"]),
+				'MidName' => strtoupper($_POST["middlename"]),
+				'Purpose' => strtoupper($_POST["purpose"]),
+				'Emergency' => strtoupper($_POST["Emergency"]),
+				'Dorm' => strtoupper($_POST["dormName"]),
+				'Emergency' => strtoupper($_POST["Emergency"]),
+				'CheckIn' => $checkIn,
+				'TCheckIn' => strtoupper($_POST["tcheckin"]),
+				'CheckOut' => $checkIn,
+				'TCheckOut' => strtoupper($_POST["tcheckout"]),
+				'Bedding' => strtoupper($_POST["bedding"]),
+				'RoomAssign' => strtoupper($_POST["roomassign"]),
+				'OrNum' => strtoupper($_POST["ornum"]),
+				'Guarantor' => strtoupper($_POST["guarantor"]),
+				'Type' => strtoupper($_POST["type"]),
+				'Rates' => strtoupper($_POST["rates"]),
+				'AmountPaid' => strtoupper($_POST["amount"]));
+	
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+			$this->{$this->db_group_name2}->where('LastName', $lname);
+			$this->{$this->db_group_name2}->where('MidName', $mname);
+			$this->{$this->db_group_name2}->update('transient', $data);
+		
+	}
+	
+   function updateResident($_POST, $fname, $lname, $mname,$numApp){
+		$arrayKeys = array_keys($_POST);
+		$arrayValues = array_values($_POST);
+		
+		for($i=0;$i<count($arrayValues);$i++){
+			if($arrayValues[$i]!=""){
+		
+			$_POST["$arrayKeys[$i]"]=strtoupper($arrayValues[$i]);
+			
+			}else{
+				$_POST["$arrayKeys[$i]"]="";
+			
+			}
+			
+			
+		}
 		
 		
-		$this->load->database();
+		
+	  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
 		
 		$stdNo = trim($_POST["Batch"]."-".$_POST["StudNumber"]);
 		$Bday = $_POST["Month"]."/".$_POST["Day"]."/".$_POST["Year"];
-		
+		/*
 		if($_POST["roomSem1"]!=""){
 			$RoomNumber=$_POST["roomSem1"];
 		}else if($_POST["roomSem2"]!=""){
@@ -1284,7 +1494,7 @@ return $str;
 				$RoomNumber=$_POST["roomSemS"];
 			
 		}else{	$RoomNumber="";}
-		
+		*/
 		
 		$data = array(
         	'StudentNumber' => $stdNo,
@@ -1312,33 +1522,40 @@ return $str;
 			'BFGF' => strtoupper($_POST["bfgf"]),
 			'College' => strtoupper($_POST["college"]),
 			//'Age' => strtoupper($_POST["Age"]),
-			'RoomNumber' => $RoomNumber
+			'RoomNumber' => $_POST["room"]
        	);
 		
 		
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('resident', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('resident', $data);
 		
 		
 		/* Update all other tables
 		 * When name is changed, we need to update all tables since it is the primary key */
 		
 		/* UPDATE APPLIANCES */
+	if($numApp>0){
+		$this->{$this->db_group_name2}->query("DELETE FROM Appliances WHERE FirstName= '$_POST[firstname]' AND LastName= '$_POST[lastname]' AND MidName= '$_POST[middlename]'");
+		
+		for($jj = 0 ;$jj<$numApp-1;$jj++){
+		if($_POST["ApplianceName".$jj]!="NONE"){
+		$dateIn = $_POST["dateInstalledMonth".$jj]."/".$_POST["dateInstalledDay".$jj]."/".$_POST["dateInstalledYear".$jj];
+		
 		$data = array(
 			'FirstName' => strtoupper($_POST["firstname"]),
 			'MidName' => strtoupper($_POST["middlename"]),
 			'LastName' => strtoupper($_POST["lastname"]),
-			'CTRLNum' => $_POST["controlNum0"]
-		
+			'CTRLNum' => $_POST["controlNum".$jj],
+			'AppName' =>$_POST["ApplianceName".$jj],
+			'DateInstalled' =>$dateIn
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('appliances', $data);
-		
+		$this->{$this->db_group_name2}->insert('appliances', $data);
+	}
+	}
+	}
 		/* UPDATE BALANCE */
 		$data = array(
 			'FirstName' => strtoupper($_POST["firstname"]),
@@ -1346,10 +1563,10 @@ return $str;
 			'LastName' => strtoupper($_POST["lastname"])
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('balance', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('balance', $data);
 		
 		/* UPDATE CUSTODIAN */
 		$data = array(
@@ -1378,10 +1595,10 @@ return $str;
 			'MarriageStatus' => strtoupper($_POST["marriageStatus"])			
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('custodian', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('custodian', $data);
 		
 		/* UPDATE HOBBIES */
 		$data = array(
@@ -1391,10 +1608,10 @@ return $str;
 			'HobbyName' => strtoupper($_POST["Hobbies"])
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('hobbies', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('hobbies', $data);
 		
 		/* UPDATE HONORSRECEIVED */
 		$data = array(
@@ -1404,10 +1621,10 @@ return $str;
 			'Honors' => strtoupper($_POST["Honors"])
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('honorsreceived', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('honorsreceived', $data);
 		
 		/* UPDATE ORG */
 		$data = array(
@@ -1417,10 +1634,10 @@ return $str;
 			'OrgName' => strtoupper($_POST["Org"])
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('org', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('org', $data);
 		
 		/* UPDATE OTHERSOURCESINCOME */
 		$data = array(
@@ -1431,10 +1648,10 @@ return $str;
 			'OtherSourceAmount ' => strtoupper($_POST["otherIncomeAmount"])
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('othersourcesincome', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('othersourcesincome', $data);
 		
 		/* UPDATE PAYMENT */
 		$data = array(
@@ -1443,140 +1660,83 @@ return $str;
 			'LastName' => strtoupper($_POST["lastname"])
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('payment', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('payment', $data);
 		
 		/* UPDATE RESERVATION */
-		$sem = "";
-		$date = "";
-		$orNum = "";
+		
+		$getTerm = "Select Term from dorm";
+		$t = $this->{$this->db_group_name2}->query($getTerm);
+
+		foreach($t->result() as $row)
+			$term = $row->Term;
+			
+		$date = $_POST["MonthR"]."/".$_POST["DayR"]."/".$_POST["YearR"];
+		//$orNum = "$_POST["Or"";
 		$amount = "";
 		$remarks = "";
 		
-		if ($_POST["OrNum1"] != ""){
-			$sem = "1";
-			$date = $_POST["Date1"];
-			$orNum = $_POST["OrNum1"];
-			$amount = $_POST["Amount1"];
-			$remarks = $_POST["Remarks1"];
-		}
-		else if ($_POST["OrNum2"] != ""){
-			$sem = "2";
-			$date = $_POST["Date2"];
-			$orNum = $_POST["OrNum2"];
-			$amount = $_POST["Amount2"];
-			$remarks = $_POST["Remarks2"];
-		}
-		else if ($_POST["OrNumS"] != ""){
-			$sem = "S";
-			$date = $_POST["DateS"];
-			$orNum = $_POST["OrNumS"];
-			$amount = $_POST["AmountS"];
-			$remarks = $_POST["RemarksS"];
-		}
 		
 		$data = array(
 			'FirstName' => strtoupper($_POST["firstname"]),
 			'MidName' => strtoupper($_POST["middlename"]),
 			'LastName' => strtoupper($_POST["lastname"]),
-			'Sem' => strtoupper($sem),
-			'ReserveOrnum' => strtoupper($orNum),
-			'ReserveAmount' => strtoupper($amount),
-			'ReserveRemarks' => strtoupper($remarks),
+			'Sem' => strtoupper($term),
+			'ReserveOrnum' => strtoupper($_POST["OrNum"]),
+			'ReserveAmount' => strtoupper($_POST["Amount"]),
+			'ReserveRemarks' => strtoupper($_POST["Remarks"]),
 			'ReserveDate' => strtoupper($date)
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('reservation', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('reservation', $data);
 		
 		/* UPDATE RESIDENTKEY */
-		
-		if ($_POST["OrNumKey1"] != ""){
-			$term = "1";
-			$date = $_POST["Date1"];
-			$orNum = $_POST["OrNumKey1"];
-			$amount = $_POST["AmountKey1"];
-			$dateReceived = $_POST["dateReceived1"];
-			$dateReturned = $_POST["dateReturned1"];
-			$remarks = $_POST["RemarksKey1"];
-		}
-		else if ($_POST["OrNumKey2"] != ""){
-			$term = "2";
-			$date = $_POST["Date2"];
-			$orNum = $_POST["OrNumKey2"];
-			$amount = $_POST["AmountKey2"];
-			$dateReceived = $_POST["dateReceived2"];
-			$dateReturned = $_POST["dateReturned2"];
-			$remarks = $_POST["RemarksKey2"];
-		}
-		else if ($_POST["OrNumKeyS"] != ""){
-			$term = "S";
-			$date = $_POST["DateS"];
-			$orNum = $_POST["OrNumKeyS"];
-			$amount = $_POST["AmountKeyS"];
-			$dateReceived = $_POST["dateReceivedS"];
-			$dateReturned = $_POST["dateReturnedS"];
-			$remarks = $_POST["RemarksKeyS"];
-		}
+		$dateReceived = $_POST["MonthRec"]."/".$_POST["DayRec"]."/".$_POST["YearRec"];	
+		$dateReturned = $_POST["MonthRet"]."/".$_POST["DayRet"]."/".$_POST["YearRet"];	
 		
 		$data = array(
 			'FirstName' => strtoupper($_POST["firstname"]),
 			'MidName' => strtoupper($_POST["middlename"]),
 			'LastName' => strtoupper($_POST["lastname"]),
 			'KeyTerm' => strtoupper($term),
-			'KeyOrnum' => strtoupper($orNum),
-			'KeyAmount' => strtoupper($amount),
+			'KeyOrnum' => strtoupper($_POST["OrNumKey"]),
+			'KeyAmount' => strtoupper($_POST["AmountKey"]),
 			'DateReceived' => strtoupper($dateReceived),
 			'DateReturned' => strtoupper($dateReturned),
-			'KeyRemarks' => strtoupper($remarks)
+			'KeyRemarks' => strtoupper($_POST["RemarksKey"])
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('residentkey', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('residentkey', $data);
 		
 		/* UPDATE RESIDENTLOGINFO */
-		
-		if ($_POST["dateInSem1"] != ""){
-			$checkIn = $_POST["dateInSem1"];
-	   		$term = "1";
-			$form = $_POST["formSem1"];
-			$room = $_POST["roomSem1"];
-		}
-		else if ($_POST["dateInSem2"] != ""){
-			$checkIn = $_POST["dateInSem2"];
-			$term = "2";
-			$form = $_POST["formSem2"];
-			$room = $_POST["roomSem2"];
-		}
-		else if ($_POST["dateInSemS"] != ""){
-			$checkIn = $_POST["dateInSemS"];
-			$term = "S";
-			$form = $_POST["formSemS"];
-			$room = $_POST["roomSemS"];
-		}
+		$dateCheckIn = $_POST["MonthLI1"]."/".$_POST["DayLI1"]."/".$_POST["YearLI1"];	
+		$dateCheckOut = $_POST["MonthLI2"]."/".$_POST["DayLI2"]."/".$_POST["YearLI2"];	
 		
 		$data = array(
 			'FirstName' => strtoupper($_POST["firstname"]),
 			'MidName' => strtoupper($_POST["middlename"]),
 			'LastName' => strtoupper($_POST["lastname"]),
-			'DateCheckIn' => strtoupper($checkIn),
-			'FormFive' => strtoupper($form),
-			'RoomNo' => strtoupper($room),
+			'DateCheckIn' => strtoupper($dateCheckIn),
+			'DateCheckOut' => strtoupper($dateCheckOut),
+			'FormFive' => strtoupper($_POST["form5"]),
+			'RoomNo' => strtoupper($_POST["room"]),
 			'Term' => strtoupper($term)
        	);
 
        	
        	
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('residentloginfo', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('residentloginfo', $data);
 		
 		
 		/* UPDATE SCHOLARSHIP */
@@ -1588,10 +1748,10 @@ return $str;
 			'MonthlyStipend' => strtoupper($_POST["MonthlyStipend"])
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('scholarship', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('scholarship', $data);
 		
 		/* UPDATE TALENT */
 		$data = array(
@@ -1601,10 +1761,10 @@ return $str;
 			'TalentName ' => strtoupper($_POST["Talents0"])			
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('talent', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('talent', $data);
 		
 		
 		/* UPDATE VIOLATION */
@@ -1614,10 +1774,10 @@ return $str;
 			'LastName' => strtoupper($_POST["lastname"])
        	);
 
-		$this->db->where('FirstName', $fname);
-		$this->db->where('LastName', $lname);
-		$this->db->where('MidName', $mname);
-		$this->db->update('violation', $data);
+		$this->{$this->db_group_name2}->where('FirstName', $fname);
+		$this->{$this->db_group_name2}->where('LastName', $lname);
+		$this->{$this->db_group_name2}->where('MidName', $mname);
+		$this->{$this->db_group_name2}->update('violation', $data);
 		
 		unset($_SESSION["fname"]);
 		unset($_SESSION["lname"]);
@@ -1625,7 +1785,7 @@ return $str;
 		
 	}	//end of updateResident
 	
-	function getNumberOutIn($month){
+   function getNumberOutIn($month){
 									
 			$q=" SELECT resident.Gender,residentloginfo.DateCheckIn,residentloginfo.DateCheckOut
 					 FROM residentloginfo
@@ -1634,7 +1794,7 @@ return $str;
 					 AND resident.FirstName=residentloginfo.FirstName 
 					 AND resident.MidName=residentloginfo.MidName";
 		
-			$query = $this->db->query($q);
+			$query = $this->{$this->db_group_name2}->query($q);
 		$inMale=0;$inFemale=0;
 		$outMale=0; $outFemale=0;		
 	  foreach($query->result() as $row  ){
@@ -1645,7 +1805,7 @@ return $str;
 	  						$inMale++;
 	  					}
 	  			}else{
-	  			 $arr=explode("/",$row->DateCheckout);
+	  			 $arr=explode("/",$row->DateCheckOut);
 	  				if($arr[0]==$month){
 	  						$outMale++;
 	  					}
@@ -1658,7 +1818,7 @@ return $str;
 	  						$inFemale++;
 	  					}
 	  			}else{
-	  			 $arr=explode("/",$row->DateCheckout);
+	  			 $arr=explode("/",$row->DateCheckOut);
 	  				if($arr[0]==$month){
 	  						$outFemale++;
 	  					}
@@ -1674,11 +1834,11 @@ return $str;
 	return $arr;
 }
 	
-	function getUnitsOfAppliances($month){
+   function getUnitsOfAppliances($month){
 		$q = "SELECT DISTINCT AppName
 			 FROM Appliances Order by AppName";
 		
-		$query = $this->db->query($q);
+		$query = $this->{$this->db_group_name2}->query($q);
 		$appName ="";
 		$cnt = 0;
 		$arr ="";
@@ -1695,10 +1855,10 @@ return $str;
 		}
 		
 					
-					$this->db->select('AppName,DateInstalled,DateCancelled,DateConfiscated');
-					$this->db->order_by('AppName');
-					$this->db->from('Appliances');
-					$appData = $this->db->get();
+					$this->{$this->db_group_name2}->select('AppName,DateInstalled,DateCancelled,DateConfiscated');
+					$this->{$this->db_group_name2}->order_by('AppName');
+					$this->{$this->db_group_name2}->from('Appliances');
+					$appData = $this->{$this->db_group_name2}->get();
 					$cnt  =0;
 					$arr = "";
 					
@@ -1753,25 +1913,25 @@ return $str;
 					
 					}
 			
-	
+	if($appName!=""){
 	foreach($appName as $app  ){
 			
 			$arr[$app] = $in[$app].",".$can[$app].",".$con[$app];
 			
 		}
-	
+	}
 	return $arr;
 	}
 	
-	function getActualCollection($month){
+   function getActualCollection($month){
 		//DormFee	AppFee	TransFee	DatePaid;
 					$df =0; $dfCnt = 0 ;
 					$af =0; $afCnt =0;
 					$tf =0; $tfCnt =0;
 					
-					$this->db->select('DormFee,AppFee,TransFee,DatePaid');
-					$this->db->from('Payment');
-					$collectionData = $this->db->get();
+					$this->{$this->db_group_name2}->select('DormFee,AppFee,TransFee,DatePaid');
+					$this->{$this->db_group_name2}->from('Payment');
+					$collectionData = $this->{$this->db_group_name2}->get();
 					foreach($collectionData->result() as $row  ){
 						
 						if($row->DatePaid!=""){
@@ -1809,11 +1969,12 @@ return $str;
 		return $total;					
  }
 
- function getAccountReceivable($month){
- 					$this->load->database();
-					$this->db->select('AppFee,ResidentFee,TransFee');
-					$this->db->from('balance');
-					$bal = $this->db->get();
+   function getAccountReceivable($month){
+ 					  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+					$this->{$this->db_group_name2}->select('AppFee,ResidentFee,TransFee');
+					$this->{$this->db_group_name2}->from('balance');
+					$bal = $this->{$this->db_group_name2}->get();
 
 					$af = 0;$rf = 0;$tf = 0;
  					$total = 0;
@@ -1827,11 +1988,12 @@ return $str;
  		return $str;//Total ResidentFee AppFee TransFee
  }
 
- function getPrevAccountReceivable($month){
- 					$this->load->database();
-					$this->db->select('AppFee,ResidentFee');
-					$this->db->from('previousaccountables');
-					$bal = $this->db->get();
+   function getPrevAccountReceivable($month){
+ 					  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	
+					$this->{$this->db_group_name2}->select('AppFee,ResidentFee');
+					$this->{$this->db_group_name2}->from('previousaccountables');
+					$bal = $this->{$this->db_group_name2}->get();
 
 					$af = 0;$rf = 0;
  					$total = 0;

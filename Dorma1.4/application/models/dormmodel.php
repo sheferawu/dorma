@@ -1,19 +1,519 @@
 <?php 
 
 class Dormmodel extends CI_Model {
-	
-	 function delete_resident_pay($fname,$lname,$mname){
+		 var $db_group_name2 = "dorm";
+		 
+ 	function __construct()
+    {
+        parent::__construct();
+ 		//$this->load->model('Dormmodel');
+        $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+ 
+    }
+    function checkSettings(){
+ 		  $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+    	  $sql = "Select Count(*) from Dorm";
+     	  $ar= $this->{$this->db_group_name2}->query($sql)->result();
+    	
+    	  $ar = (array)$ar[0];
+    
+    	  $ar = array_values($ar);
+    	  
+    	return $ar[0];
+    	
+    }
+  
+    
+	function delete_resident_pay($fname,$lname,$mname){
 		
-		$con = mysql_connect("localhost","DORMA","dorm");
+		//$con = mysql_connect("localhost","DORMA","dorm");
 		
-		mysql_select_db("dormdatabase", $con);
-		mysql_query("DELETE FROM Payment WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'")or die("Can't Delete ".mysql_error());
+		//mysql_select_db("dormdatabase", $con);
+	  $this->{$this->db_group_name2}->query("DELETE FROM Payment WHERE FirstName= '$fname' AND LastName= '$lname' AND MidName= '$mname'");
 		
-		mysql_close($con);
+		//mysql_close($con);
 		
 		
 	}
 	
+  	function saveSettings($_POST){
+  	$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+				
+  	//for the dorm table 
+  	
+  	//start date
+  	
+  	$sDate= $_POST["sMonth"]."/".$_POST["sDay"]."/".$_POST["sYear"];
+  	$eDate= $_POST["eMonth"]."/".$_POST["eDay"]."/".$_POST["eYear"];
+  	$numCluster = count(explode("*",$_POST["Clusters"]));
+  	$query = "DELETE FROM Dorm";
+  	$_POST["Clusters"] = trim($_POST["Clusters"]); 
+  	$insertquery = "
+ INSERT INTO `dorm` (`DormName`, `Alias`, `MonthlyRent`, `DailyRent`, `StartDate`, `EndDate`, `NumberOfRooms`, `MaxResidentPerRoom`, `NumCluster`, `Clusters`, `Occupancy`,`TFUP`,`TFNUP`,`SchoolYear`,`Term`, `MaleOccupant`, `FemaleOccupant`) VALUES
+('$_POST[DormName]', '$_POST[Alias]', '$_POST[MonthlyRent]','$_POST[DailyRent]', '$sDate', '$eDate', '$_POST[NumberOfRooms]', $_POST[MaxResidentPerRoom],  $numCluster, '$_POST[Clusters]',$_POST[Occupancy],$_POST[TFUP],$_POST[TFNUP],'$_POST[SY]','$_POST[Term]', '$_POST[MaleOcc]', '$_POST[FemaleOcc]')
+  ";
+  
+  	$this->{$this->db_group_name2}->query($query);
+  	
+  	$this->{$this->db_group_name2}->query($insertquery);
+//para sa appliance
+
+ if(isset($_SESSION["numAppSet"])){
+ 	
+ 	$numApp = $_SESSION["numAppSet"];
+ 	$insertApp = "INSERT INTO `dormappliance` (`ApplianceName`, `MonthlyRent`, `DailyRent`) VALUES";
+ 	$query = "DELETE FROM dormappliance";
+  	$sucess = true;
+ 	for($i = 0;$i<$numApp;$i++){
+ 		
+ 		if(isset($_POST["App".$i])&&$_POST["AppMonth".$i]&&$_POST["AppDaily".$i]){
+ 			$app = $_POST["App".$i];
+ 			$appM = $_POST["AppMonth".$i];
+ 			$appD = $_POST["AppDaily".$i];
+ 			if(trim($app)!=""&&trim($appM)!=""&&trim($appD)!="")
+ 				$insertApp.="('".$app."','".$appM."','".$appD."'),";
+ 		}else{
+ 			
+ 			$sucess = false;
+ 			
+ 			break;
+ 		}
+ 	}
+ 	$insertApp = substr($insertApp,0,strlen($insertApp)-1);
+ 		if($sucess){
+ 			$sucess = "";
+  	$this->{$this->db_group_name2}->query($query);
+  	
+  	$this->{$this->db_group_name2}->query($insertApp);
+ 		
+ 		}else{
+ 			$sucess = "Failure To Modify Appliances";
+ 		}
+ 		
+ } 	
+ $_SESSION["Settings"] = "New Settings Saved!<br/>$sucess";
+  	
+  }
+  	function getDormApp(){
+ 		       $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+				$this->{$this->db_group_name2}->select('*');
+				$app = $this->{$this->db_group_name2}->get('dormappliance');
+				$arr = "";
+				$cnt = 0;
+				foreach ($app->result() as $row)
+				{
+						
+					$arr[$cnt++]= $row->ApplianceName."*".$row->MonthlyRent."*".$row->DailyRent; 
+				}
+	
+ 		       	
+  	
+  	return $arr;
+  	
+  } 
+  
+    function getDormAppNames(){
+ 		       $this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+				$this->{$this->db_group_name2}->select('ApplianceName');
+				$app = $this->{$this->db_group_name2}->get('dormappliance');
+				$arr = "NONE*";
+				
+				foreach ($app->result() as $row)
+				{
+						
+					$arr.= $row->ApplianceName."*"; 
+				}
+				$arr = substr($arr,0,strlen($arr)-1);;
+				$arr = "'".$arr."'";
+ 		       	
+  	
+  	return $arr;
+  	
+  } 
+  
+  	function edit_settings(){
+  	$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+  	$this->load->model('Optionmodel');
+  	//$dorm = $_SESSION["DORMNAME"];
+  	$query = $this->{$this->db_group_name2}->query("SELECT * from dorm ");	
+  
+  		$r ="";
+		$arrResField = $this->Optionmodel->returnFieldsArray("dorm");
+		$cnt = 0;
+		foreach ($query->result() as $row)
+		{
+			$cnt = 0;
+			foreach($arrResField as $af){
+			$r[$af] = strtolower($row->$af);
+			}
+		}
+		
+	return $r;
+  }
+  
+  	function get_database_group() {
+        return $this->db_group_name2;
+    }
+	
+	function createDb($dormAlias){
+	$this->load->dbforge();
+	$this->load->dbutil();
+
+	
+ $dbname= strtolower($dormAlias.'database');
+	$_SESSION["db"] =$dbname ;
+ if(!$this->dbutil->database_exists($dbname)){
+	$transient ="CREATE TABLE IF NOT EXISTS `transient` (
+  `ControlNumber` varchar(10) NOT NULL,
+  `FillUpDate` varchar(15) DEFAULT NULL,
+  `LastName` varchar(15) NOT NULL DEFAULT '',
+  `FirstName` varchar(15) NOT NULL DEFAULT '',
+  `MidName` varchar(15) NOT NULL DEFAULT '',
+  `Purpose` varchar(30) DEFAULT NULL,
+  `Emergency` varchar(10) DEFAULT NULL,
+  `Dorm` varchar(25) DEFAULT NULL,
+  `CheckIn` varchar(15) DEFAULT NULL,
+  `TCheckIn` varchar(15) DEFAULT NULL,
+  `CheckOut` varchar(15) DEFAULT NULL,
+  `TCheckOut` varchar(15) DEFAULT NULL,
+  `Bedding` varchar(15) DEFAULT NULL,
+  `RoomAssign` varchar(5) DEFAULT NULL,
+  `OrNum` varchar(15) DEFAULT NULL,
+  `Guarantor` varchar(25) DEFAULT NULL,
+  `Type` varchar(20) DEFAULT NULL,
+  `Rates` varchar(20) DEFAULT NULL,
+  `AmountPaid` int(10) DEFAULT NULL,
+  `Month` int(2) NOT NULL,
+  PRIMARY KEY (`FirstName`,`MidName`,`LastName`)
+)
+	
+	";
+	$dormapp="CREATE TABLE IF NOT EXISTS `dormappliance` (
+  `ApplianceName` varchar(50) NOT NULL,
+  `MonthlyRent` decimal(5,2) DEFAULT NULL,
+  `DailyRent` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`ApplianceName`)
+)";
+		
+		$app = "CREATE TABLE IF NOT EXISTS `appliances` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `CTRLNum` int(10) NOT NULL DEFAULT '0',
+  `RumNum` int(10) DEFAULT NULL,
+  `AppName` varchar(15) DEFAULT NULL,
+  `Term` char(1) DEFAULT NULL,
+  `DateInstalled` varchar(15) DEFAULT NULL,
+  `DateCancelled` varchar(15) DEFAULT NULL,
+  `DateConfiscated` varchar(15) DEFAULT NULL,
+  `Remarks` varchar(128) DEFAULT NULL,
+  UNIQUE KEY `CTRLNum` (`CTRLNum`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`),
+  KEY `FirstName` (`FirstName`)
+)";
+		
+		$bal = "CREATE TABLE IF NOT EXISTS `balance` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `PeriodCovered` varchar(128) DEFAULT NULL,
+  `ResidentFee` decimal(10,2) NOT NULL,
+  `AppFee` decimal(10,2) NOT NULL,
+  `TransFee` decimal(10,2) NOT NULL,
+  `Total` decimal(15,4) DEFAULT NULL,
+  PRIMARY KEY (`LastName`,`MidName`,`FirstName`),
+  KEY `MidName` (`MidName`),
+  KEY `LastName` (`LastName`)
+)";
+		
+		$cust = "CREATE TABLE IF NOT EXISTS `custodian` (
+  `FirstName` varchar(30) NOT NULL DEFAULT '',
+  `MidName` varchar(15) NOT NULL DEFAULT '',
+  `LastName` varchar(15) NOT NULL DEFAULT '',
+  `Guardian1` varchar(60) DEFAULT NULL,
+  `Guardian2` varchar(60) DEFAULT NULL,
+  `Guardian1tel` varchar(11) DEFAULT NULL,
+  `Guardian2tel` varchar(11) DEFAULT NULL,
+  `Guardian1add` varchar(100) DEFAULT NULL,
+  `Guardian2add` varchar(100) DEFAULT NULL,
+  `MotherName` varchar(60) DEFAULT NULL,
+  `MotherOccupation` varchar(20) DEFAULT NULL,
+  `MotherMonthlyIncome` int(20) DEFAULT NULL,
+  `MotherEmployer` varchar(30) DEFAULT NULL,
+  `MotherOfficeAddress` varchar(100) DEFAULT NULL,
+  `MTelNo` varchar(11) DEFAULT NULL,
+  `FatherName` varchar(60) DEFAULT NULL,
+  `FatherOccupation` varchar(20) DEFAULT NULL,
+  `FatherMonthlyIncome` int(20) DEFAULT NULL,
+  `FatherEmployer` varchar(30) DEFAULT NULL,
+  `FatherOfficeAddress` varchar(100) DEFAULT NULL,
+  `FTelNo` varchar(11) DEFAULT NULL,
+  `LivingStat` varchar(128) NOT NULL,
+  `MarriageStatus` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`FirstName`,`MidName`,`LastName`),
+  KEY `FirstName` (`FirstName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		$dorm = "CREATE TABLE IF NOT EXISTS `dorm` (
+  `DormName` varchar(30) NOT NULL DEFAULT '',
+  `Alias` varchar(10) DEFAULT NULL,
+  `MonthlyRent` int(11) DEFAULT NULL,
+  `DailyRent` decimal(5,2) DEFAULT NULL,
+  `StartDate` varchar(12) DEFAULT NULL,
+  `EndDate` varchar(12) DEFAULT NULL,
+  `NumberOfRooms` int(11) DEFAULT NULL,
+  `MaxResidentPerRoom` int(11) DEFAULT NULL,
+  `NumCluster` int(11) DEFAULT NULL,
+  `Clusters` varchar(128) DEFAULT NULL,
+  `Occupancy` int(11) DEFAULT NULL,
+  `TFUP` int(3) DEFAULT NULL,
+  `TFNUP` int(3) DEFAULT NULL,
+  `SchoolYear` varchar(10) DEFAULT NULL,
+  `Term` char(1) NOT NULL,
+  `FemaleOccupant` int(11) DEFAULT NULL,
+  `MaleOccupant` int(11) DEFAULT NULL,
+  PRIMARY KEY (`DormName`)
+)";
+		
+		$hob = "CREATE TABLE IF NOT EXISTS `hobbies` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `HobbyName` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`LastName`,`MidName`,`FirstName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		$honors = "CREATE TABLE IF NOT EXISTS `honorsreceived` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `Honors` varchar(40) DEFAULT NULL,
+  PRIMARY KEY (`LastName`,`MidName`,`FirstName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		$mp = "CREATE TABLE IF NOT EXISTS `manpower` (
+  `EmpNum` varchar(30) NOT NULL DEFAULT '',
+  `Name` varchar(15) DEFAULT NULL,
+  `DateStarted` varchar(8) DEFAULT NULL,
+  PRIMARY KEY (`EmpNum`)
+)";
+		
+		$org = "CREATE TABLE IF NOT EXISTS `org` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `OrgName` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`LastName`,`MidName`,`FirstName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		$others = "CREATE TABLE IF NOT EXISTS `othersourcesincome` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `OtherSources` varchar(20) DEFAULT NULL,
+  `OtherSourceAmount` int(11) DEFAULT NULL,
+  PRIMARY KEY (`LastName`,`MidName`,`FirstName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		$pay = "CREATE TABLE IF NOT EXISTS `payment` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `Term` varchar(128) NOT NULL,
+  `PeriodCovered` varchar(128) DEFAULT NULL,
+  `Ornum` varchar(128) DEFAULT NULL,
+  `DormFee` varchar(128) NOT NULL,
+  `AppFee` varchar(128) DEFAULT NULL,
+  `TransFee` varchar(128) DEFAULT NULL,
+  `DatePaid` varchar(128) DEFAULT NULL,
+  `Remarks` varchar(128) DEFAULT NULL
+)";
+		
+		$prevacc ="CREATE TABLE IF NOT EXISTS `previousaccountables` (
+  `StudentNumber` varchar(10) DEFAULT NULL,
+  `Name` varchar(90) NOT NULL,
+  `College` varchar(6) DEFAULT NULL,
+  `ResidentFee` decimal(10,2) DEFAULT NULL,
+  `AppFee` decimal(10,2) DEFAULT NULL,
+  `TransFee` decimal(10,2) DEFAULT NULL,
+  `PeriodCovered` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`Name`)
+)";
+		
+		$reserve  = "CREATE TABLE IF NOT EXISTS `reservation` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `Sem` varchar(1) NOT NULL,
+  `ReserveOrnum` varchar(15) DEFAULT NULL,
+  `ReserveAmount` int(11) DEFAULT NULL,
+  `ReserveRemarks` varchar(30) DEFAULT NULL,
+  `ReserveDate` varchar(20) NOT NULL,
+  PRIMARY KEY (`FirstName`,`MidName`,`LastName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		$resident = "CREATE TABLE IF NOT EXISTS `resident` (
+  `StudentNumber` varchar(10) NOT NULL,
+  `FirstName` varchar(30) NOT NULL DEFAULT '',
+  `MidName` varchar(15) NOT NULL DEFAULT '',
+  `LastName` varchar(15) NOT NULL DEFAULT '',
+  `Bday` varchar(20) DEFAULT NULL,
+  `Gender` varchar(10) DEFAULT NULL,
+  `CivStatus` varchar(10) DEFAULT NULL,
+  `Course` varchar(30) DEFAULT NULL,
+  `LastSchoolAttended` varchar(50) DEFAULT NULL,
+  `SchoolType` varchar(10) DEFAULT NULL,
+  `Religion` varchar(20) DEFAULT NULL,
+  `Classification` varchar(15) DEFAULT NULL,
+  `STFAPBracket` varchar(3) DEFAULT NULL,
+  `Address` varchar(200) DEFAULT NULL,
+  `Region` varchar(10) DEFAULT NULL,
+  `TelNo` int(11) DEFAULT NULL,
+  `Email` varchar(30) DEFAULT NULL,
+  `NumBro` int(11) DEFAULT NULL,
+  `NumSis` int(11) DEFAULT NULL,
+  `BirthOrder` varchar(15) DEFAULT NULL,
+  `Ailments` varchar(30) DEFAULT NULL,
+  `Medications` varchar(30) DEFAULT NULL,
+  `BFGF` int(11) DEFAULT NULL,
+  `College` varchar(30) DEFAULT NULL,
+  `Age` int(11) DEFAULT NULL,
+  `RoomNumber` varchar(4) NOT NULL,
+  PRIMARY KEY (`FirstName`,`MidName`,`LastName`),
+  UNIQUE KEY `StudentNumber` (`StudentNumber`),
+  UNIQUE KEY `StudentNumber_2` (`StudentNumber`)
+)";
+	
+		$residentkey = "CREATE TABLE IF NOT EXISTS `residentkey` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `KeyTerm` varchar(1) NOT NULL,
+  `KeyOrnum` varchar(15) DEFAULT NULL,
+  `KeyAmount` int(11) DEFAULT NULL,
+  `DateReceived` varchar(15) DEFAULT NULL,
+  `DateReturned` varchar(15) DEFAULT NULL,
+  `KeyRemarks` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`FirstName`,`MidName`,`LastName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		
+		$residentloginfo = "CREATE TABLE IF NOT EXISTS `residentloginfo` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `DateCheckIn` varchar(15) DEFAULT NULL,
+  `DateCheckOut` varchar(15) DEFAULT NULL,
+  `FormFive` varchar(15) DEFAULT NULL,
+  `RoomNo` varchar(4) DEFAULT NULL,
+  `Term` varchar(2) DEFAULT NULL,
+  PRIMARY KEY (`FirstName`,`MidName`,`LastName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		$scholarship = "CREATE TABLE IF NOT EXISTS `scholarship` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `ScholarshipName` varchar(20) NOT NULL DEFAULT '',
+  `MonthlyStipend` int(6) DEFAULT NULL,
+  PRIMARY KEY (`LastName`,`MidName`,`FirstName`,`ScholarshipName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`),
+  KEY `FirstName` (`FirstName`),
+  KEY `ScholarshipName` (`ScholarshipName`)
+)";
+		
+		$talent = "CREATE TABLE IF NOT EXISTS `talent` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `TalentName` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`LastName`,`MidName`,`FirstName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		$violation = "CREATE TABLE IF NOT EXISTS `violation` (
+  `LastName` varchar(15) NOT NULL,
+  `MidName` varchar(15) NOT NULL,
+  `FirstName` varchar(30) NOT NULL,
+  `DateOfViolation` varchar(15) DEFAULT NULL,
+  `ActionTaken` varchar(30) DEFAULT NULL,
+  `Date` varchar(15) DEFAULT NULL,
+  `Nature` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`LastName`,`MidName`,`FirstName`),
+  KEY `LastName` (`LastName`),
+  KEY `MidName` (`MidName`)
+)";
+		
+		$workload = "CREATE TABLE IF NOT EXISTS `workload` (
+  		`ID` int(4) not null unique auto_increment,
+		`Nature` varchar(30) NOT NULL,
+  		`SpecificWork` varchar(20) NOT NULL,
+ 		`Manpower` varchar(100) NOT NULL,
+  		`Status` varchar(128) NOT NULL,
+  		`DateStarted` varchar(20) NOT NULL,
+  		`DateCompleted` varchar(20) NOT NULL,
+  		`Remarks` varchar(20) NOT NULL
+		)";
+
+$this->dbforge->create_database($dbname);
+$_SESSION["db"] =$dbname ;
+$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+ 
+$this->{$this->db_group_name2}->query($dorm);
+$this->{$this->db_group_name2}->query($resident);
+$this->{$this->db_group_name2}->query($residentkey);
+$this->{$this->db_group_name2}->query($residentloginfo);
+$this->{$this->db_group_name2}->query($scholarship);
+$this->{$this->db_group_name2}->query($talent);
+$this->{$this->db_group_name2}->query($cust);
+$this->{$this->db_group_name2}->query($honors);
+$this->{$this->db_group_name2}->query($bal);
+$this->{$this->db_group_name2}->query($hob);
+$this->{$this->db_group_name2}->query($mp);
+$this->{$this->db_group_name2}->query($org);
+$this->{$this->db_group_name2}->query($app);
+$this->{$this->db_group_name2}->query($others);
+$this->{$this->db_group_name2}->query($pay);
+$this->{$this->db_group_name2}->query($prevacc);
+$this->{$this->db_group_name2}->query($reserve);
+$this->{$this->db_group_name2}->query($violation);
+$this->{$this->db_group_name2}->query($workload);
+
+$this->{$this->db_group_name2}->query($dormapp);
+
+$this->{$this->db_group_name2}->query($transient);
+//}
+	}
+$this->{$this->db_group_name2}->close();
+	
+return $dbname;
+		
+	}
+	
+	function logoutUser(){
+		unset($_SESSION['username']);
+		unset($_SESSION['password']);
+		session_destroy();
+		redirect('');
+	}
 	
 	function paymentOpt($_GET,$appFee,$resFee,$term){
 	session_start();
@@ -21,10 +521,10 @@ class Dormmodel extends CI_Model {
 	$_GET["appfee"] = $appFee;
 	$_GET["tarnsfee"] =0 ;	
 		$_GET["term"]=$term;
-	$this->db->where('FirstName', $_SESSION["fNamePay"]); 
-	$this->db->where('LastName', $_SESSION["lNamePay"]); 
-	$this->db->where('MidName', $_SESSION["mNamePay"]); 
-	$pay= $this->db->get('payment');
+	$this->{$this->db_group_name2}->where('FirstName', $_SESSION["fNamePay"]); 
+	$this->{$this->db_group_name2}->where('LastName', $_SESSION["lNamePay"]); 
+	$this->{$this->db_group_name2}->where('MidName', $_SESSION["mNamePay"]); 
+	$pay= $this->{$this->db_group_name2}->get('payment');
 	
 		for($i=0;$i<8;$i++){
 					
@@ -61,12 +561,12 @@ class Dormmodel extends CI_Model {
 				if($data["PeriodCovered"]!=""){
 				if(count($pay->result())<1){
 				 
-				 $this->db->insert('payment', $data); 
+				$this->{$this->db_group_name2}->insert('payment', $data); 
 				}else{
-					$this->db->where('LastName',$_SESSION["lNamePay"]);
-					$this->db->where('FirstName',$_SESSION["fNamePay"]);
-					$this->db->where('MidName',$_SESSION["mNamePay"]);
-					$this->db->update('payment', $data); 
+				$this->{$this->db_group_name2}->where('LastName',$_SESSION["lNamePay"]);
+				$this->{$this->db_group_name2}->where('FirstName',$_SESSION["fNamePay"]);
+				$this->{$this->db_group_name2}->where('MidName',$_SESSION["mNamePay"]);
+				$this->{$this->db_group_name2}->update('payment', $data); 
 					
 				} 
 				}
@@ -80,13 +580,13 @@ class Dormmodel extends CI_Model {
 	function getPaidPeriods($fname,$lname,$mname){
 		$periodPaid ="";
 		$cnt =0;
-		$this->load->database();
-		$this->db->select('PeriodCovered');
-		$this->db->where('FirstName',$fname); 
-		$this->db->where('LastName', $lname); 
-		$this->db->where('MidName',$mname); 
-		$this->db->from('payment');
-		$pay = $this->db->get();
+		
+	$this->{$this->db_group_name2}->select('PeriodCovered');
+	$this->{$this->db_group_name2}->where('FirstName',$fname); 
+	$this->{$this->db_group_name2}->where('LastName', $lname); 
+	$this->{$this->db_group_name2}->where('MidName',$mname); 
+	$this->{$this->db_group_name2}->from('payment');
+		$pay = $this->{$this->db_group_name2}->get();
 		$cnt=0;
 		$paid = "";
 		 
@@ -154,11 +654,11 @@ class Dormmodel extends CI_Model {
 	}
  	
 	function getPaymentPeriods($periodsArr){
-					$bigArray="";
-					$this->load->database();
-					$this->db->select('FirstName,LastName,MidName,StudentNumber, Course, College, RoomNumber');
-					$this->db->from('resident');
-					$res = $this->db->get();
+	$bigArray="";
+					
+	$this->{$this->db_group_name2}->select('FirstName,LastName,MidName,StudentNumber, Course, College, RoomNumber');
+	$this->{$this->db_group_name2}->from('resident');
+	$res = $this->{$this->db_group_name2}->get();
 		foreach ($res->result() as $row)
 		{	
 				$cnt = 0;
@@ -188,6 +688,23 @@ class Dormmodel extends CI_Model {
 	return $bigArray ;
 }
 	
+	function getTransientPaymentPeriods(){
+		
+		$this->{$this->db_group_name2}->select('FirstName,LastName,MidName,CheckIn,CheckOut,Type,Rates,AmountPaid');
+		$this->{$this->db_group_name2}->from('transient');
+		
+		$res = $this->{$this->db_group_name2}->get();
+		$arr ="";
+		$cnt = 0;
+		
+		foreach ($res->result() as $row){
+			
+			$arr[$row->LastName."@".$row->FirstName."@".$row->MidName]= $row->CheckIn."@".$row->CheckOut."@".$row->Type."@".$row->Rates."@".$row->AmountPaid;
+					
+		}
+		
+		return $arr;
+	}
 	
 	function getCluster($term,$num,$dormName){
 		
@@ -196,12 +713,12 @@ class Dormmodel extends CI_Model {
 			case "2": $t = 2; break;
 			case "s": $t = 3; break;
 		}
-		
-						$this->load->database();
-						$this->db->select('Clusters,NumCluster');
-						$this->db->where('Alias', $dormName); 
-						$this->db->from('dorm');
-						$dorm= $this->db->get(); 
+		$clusters = "";
+						$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+	$this->{$this->db_group_name2}->select('Clusters,NumCluster');
+	$this->{$this->db_group_name2}->where('Alias', $dormName); 
+						$this->{$this->db_group_name2}->from('dorm');
+						$dorm= $this->{$this->db_group_name2}->get(); 
 		
 						if(count($dorm->result())>0){
 							
@@ -210,11 +727,45 @@ class Dormmodel extends CI_Model {
 								$clusters = $row->Clusters;
 							}
 						}
+			$arr = "";
+			if($clusters!=""){
 			$arr = explode("*",$clusters);//to be recode mamaya
+			}
 			return $arr;
 	
 	}
-
+	function update_workload($_POST){
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+		
+		$this->{$this->db_group_name2}->select('*');
+		$this->{$this->db_group_name2}->from('workload');
+		$work = $this->{$this->db_group_name2}->get();
+		
+		$cnt = 0;
+		foreach($work->result() as $w){
+			$start = $_POST["startMonth$cnt"]."/".$_POST["startDay$cnt"]."/".$_POST["startYear$cnt"];
+			
+			if ($_POST["compMonth$cnt"] == "0") $comp = "";
+			else $comp = $_POST["compMonth$cnt"]."/".$_POST["compDay$cnt"]."/".$_POST["compYear$cnt"];
+			
+			$data = array(
+          		'Nature' => strtoupper($_POST["workNature$cnt"]),
+				'SpecificWork' => strtoupper($_POST["specWork$cnt"]),
+				'Manpower' => strtoupper($_POST["manpower$cnt"]),
+				'Status' => strtoupper($_POST["status$cnt"]),
+				'DateStarted' => "$start",
+				'DateCompleted' => "$comp",
+				'Remarks' => strtoupper($_POST["remarks$cnt"]),							
+			);
+					
+			$this->{$this->db_group_name2}->where('ID', $w->ID);
+			$this->{$this->db_group_name2}->update('workload', $data); 
+			$cnt++;		
+		}
+				
+		
+	}
+	
 	function add_workload($_POST){
 	$str="";
    		$arrayKeys = array_keys($_POST);
@@ -232,13 +783,16 @@ class Dormmodel extends CI_Model {
 			
 		$startDate = $_POST["startMonth"]."/".$_POST["startDay"]."/".$_POST["startYear"];	
 		$endDate = $_POST["compMonth"]."/".$_POST["compDay"]."/".$_POST["compYear"];	
+		
+		if ($endDate == "0//") $endDate = "";
+		
 		$nature = $_POST["workNature"];
 		$status = $_POST["status"];
 		$sWork = $_POST["specWork"];
 		$manpower = $_POST["manpower"];
 		$remarks = $_POST["remarks"];
 		
-		$q = "INSERT INTO workload values
+		$q = "INSERT INTO workload(`Nature`,`SpecificWork`,`Manpower`,`Status`,`DateStarted`,`DateCompleted`,`Remarks`) values
 			 (
 			 '$nature',
 			 '$sWork',
@@ -248,31 +802,38 @@ class Dormmodel extends CI_Model {
 			 '$endDate',
 			 '$remarks')";
 		
-		$query = $this->db->query($q);
+		$query = $this->{$this->db_group_name2}->query($q);
 		
 	}
-function view_workload(){
+	function view_workload(){
  	$q = "SELECT * from workload order by nature";
 		
-	$query = $this->db->query($q);
-	$result = "<table border>
-				<tr><th>Nature of Work</th>
+	$query = $this->{$this->db_group_name2}->query($q);
+	$result = "
+				<table border>
+				<tr><th>Nature</th>
+					<th>Specific Work</th>
 					<th>Manpower</th>
 					<th>Status</th>
 					<th>Start Date</th>
 					<th>Completion Date</th>
-					<th>Remarks</th>";
+					<th>Remarks</th>
+					</tr>";
 	
  	foreach($query->result() as $row){
 			$result.="<tr>";
+			$result.="<td>".ucwords(strtolower($row->Nature))."</td>";
 			$result.="<td>".ucwords(strtolower($row->SpecificWork))."</td>";
 			$result.="<td>".ucwords(strtolower($row->Manpower))."</td>";
 			$result.="<td>".ucwords(strtolower($row->Status))."</td>";
 			$result.="<td>".ucwords(strtolower($row->DateStarted))."</td>";
 			$result.="<td>".ucwords(strtolower($row->DateCompleted))."</td>";
 			$result.="<td>".ucwords(strtolower($row->Remarks))."</td>";
+	
 			$result.="</tr>";	
 	}
+	
+	
 	
 	$result.="</table>";
 	
@@ -281,11 +842,166 @@ function view_workload(){
 	return $result;
  }
  
- function getAccountReceivable(){
- 			$this->db->select('StudentNumber,Name,College,ResidentFee, AppFee, TransFee, PeriodCovered');
-			$this->db->from('previousaccountables');
-			$this->db->order_by('Name');
-			$res = $this->db->get();
+function edit_workload(){
+ 	$q = "SELECT * from workload order by nature";
+		
+	$query = $this->{$this->db_group_name2}->query($q);
+	$result = "	<form action=\"index.php?c=dorm&m=updateWorkload\" method=\"POST\" name=\"editProjectForm\"  onsubmit=\"return(validateEditWorkloadForm(this))\">
+				<table border id=\"workList\">
+				<tr>
+					<th>Nature</th>
+					<th>Specific Work</th>
+					<th>Manpower</th>
+					<th>Status</th>
+					<th>Start Date</th>
+					<th>Completion Date</th>
+					<th>Remarks</th>
+					</tr>";
+	$cnt = 0;
+ 	foreach($query->result() as $row){
+ 			$nature = ucwords(strtolower($row->Nature));
+ 			$sWork = ucwords(strtolower($row->SpecificWork));
+ 			$manpower = ucwords(strtolower($row->Manpower));
+ 			$status = ucwords(strtolower($row->Status));
+ 			$startArray = explode("/", ucwords(strtolower($row->DateStarted)));
+ 			$remarks = ucwords(strtolower($row->Remarks)); 			
+ 			
+ 			if (ucwords(strtolower($row->DateCompleted)) == ""){
+ 				$compArray[0] = "0";
+ 				$compArray[1] = "1";
+ 				$compArray[2] = "1950";
+ 			}
+ 			else $compArray = explode("/", ucwords(strtolower($row->DateCompleted)));
+ 			
+ 			$bool = "";
+ 			for ($i = 0; $i < 3; $i++)
+ 				$bool[$i] = "";
+ 			
+ 			if($nature == "Repairs") $bool[0] = "selected=\"selected\"";
+			if($nature == "Maintenance Works") $bool[1] = "selected=\"selected\"";
+ 			if($nature == "Projects") $bool[2] = "selected=\"selected\"";
+ 			
+ 			$wnat = "<select name=\"workNature$cnt\" id=\"workNature$cnt\">
+					<option value=\"Repairs\" $bool[0]>Repairs</option>
+					<option value=\"Maintenance Works\" $bool[1]>Maintenance</option>
+					<option value=\"Projects\" $bool[2]>Projects</option>";
+ 			
+ 			$bool = "";
+ 			for ($i = 0; $i < 12; $i++)
+ 				$bool[$i] = "";
+ 			
+ 			if(trim(strtoupper($startArray[0])) == "JAN") $bool[0] = "selected=\"selected\"";
+			if(trim(strtoupper($startArray[0])) == "FEB") $bool[1] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "MAR") $bool[2] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "APR") $bool[3] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "MAY") $bool[4] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "JUN") $bool[5] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "JUL") $bool[6] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "AUG") $bool[7] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "SEP") $bool[8] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "OCT") $bool[9] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "NOV") $bool[10] = "selected=\"selected\"";
+ 			if(trim(strtoupper($startArray[0])) == "DEC") $bool[11] = "selected=\"selected\"";
+ 			
+ 			$sm = "<select name=\"startMonth$cnt\" id=\"startMonth$cnt\" onchange=\"getMonth(this.options[this.selectedIndex].value,'startDay$cnt','startYear$cnt')\">
+					<option value=\"0\" >M</option>
+					<option value=\"Jan\" $bool[0]>1</option>
+					<option value=\"Feb\" $bool[1]>2</option>
+					<option value=\"Mar\" $bool[2]>3</option>
+					<option value=\"Apr\" $bool[3]>4</option>
+					<option value=\"May\" $bool[4]>5</option>
+					<option value=\"Jun\" $bool[5] >6</option>
+					<option value=\"Jul\" $bool[6]>7</option>
+					<option value=\"Aug\" $bool[7]>8</option>
+					<option value=\"Sep\" $bool[8]>9</option>
+					<option value=\"Oct\" $bool[9]>10</option>
+					<option value=\"Nov\" $bool[10]>11</option>
+					<option value=\"Dec\" $bool[11]>12</option>
+				</select>
+				<div style=\"display:inline;\" id = \"startDay$cnt\">
+					<select name=\"startDay$cnt\">
+						<option value=\"$startArray[1]\">$startArray[1]</option>
+					</select>
+				</div>
+				<div style=\"display:inline;\" id = \"startYear$cnt\">
+					<select name=\"startYear$cnt\" >
+						<option value=\"$startArray[2]\">$startArray[2]</option>
+					</select>
+				</div>";
+ 			
+ 			
+ 			$bool = "";
+ 			for ($i = 0; $i < 12; $i++)
+ 				$bool[$i] = "";
+ 			
+ 			if(trim(strtoupper($compArray[0])) == "JAN") $bool[0] = "selected=\"selected\"";
+			if(trim(strtoupper($compArray[0])) == "FEB") $bool[1] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "MAR") $bool[2] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "APR") $bool[3] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "MAY") $bool[4] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "JUN") $bool[5] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "JUL") $bool[6] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "AUG") $bool[7] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "SEP") $bool[8] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "OCT") $bool[9] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "NOV") $bool[10] = "selected=\"selected\"";
+ 			if(trim(strtoupper($compArray[0])) == "DEC") $bool[11] = "selected=\"selected\"";
+ 			
+ 			$cm = "<select name=\"compMonth$cnt\" id=\"compMonth$cnt\" onchange=\"getMonth(this.options[this.selectedIndex].value,'compDay$cnt','compYear$cnt')\">
+					<option value=\"0\" >M</option>
+					<option value=\"Jan\" $bool[0]>1</option>
+					<option value=\"Feb\" $bool[1]>2</option>
+					<option value=\"Mar\" $bool[2]>3</option>
+					<option value=\"Apr\" $bool[3]>4</option>
+					<option value=\"May\" $bool[4]>5</option>
+					<option value=\"Jun\" $bool[5] >6</option>
+					<option value=\"Jul\" $bool[6]>7</option>
+					<option value=\"Aug\" $bool[7]>8</option>
+					<option value=\"Sep\" $bool[8]>9</option>
+					<option value=\"Oct\" $bool[9]>10</option>
+					<option value=\"Nov\" $bool[10]>11</option>
+					<option value=\"Dec\" $bool[11]>12</option>
+				</select>
+				<div style=\"display:inline;\" id = \"compDay$cnt\">
+					<select name=\"compDay$cnt\">
+						<option value=\"$compArray[1]\">$compArray[1]</option>
+					</select>
+				</div>
+				<div style=\"display:inline;\" id = \"compYear$cnt\">
+					<select name=\"compYear$cnt\" >
+						<option value=\"$compArray[2]\">$compArray[2]</option>
+					</select>
+				</div>";
+ 			
+			$result.="<tr>";
+			//$result.="<td><input type=\"radio\" name=\"editWork\" value=\"$row->ID\" onclick=\"enableRow($row->ID)\"></td>";
+			$result.="<td>$wnat</td>";
+			$result.="<td><input type=\"text\" name=\"specWork$cnt\" id=\"specWork$cnt\" value=\"$sWork\" size=\"10\"/></td>";
+			$result.="<td><input type=\"text\" name=\"manpower$cnt\" id=\"manpower$cnt\" value=\"$manpower\"  size=\"15\"/></td>";
+			$result.="<td><input type=\"text\" name=\"status$cnt\" id=\"status$cnt\" value=\"$status\"/></td>";
+			$result.="<td>$sm</td>";
+			$result.="<td>$cm</td>";
+			$result.="<td><input type=\"text\" name=\"remarks$cnt\" id=\"remarks$cnt\" value=\"$remarks\" size=\"5\"/></td>";
+	
+			$result.="</tr>";	
+			$cnt++;
+	}
+	
+	
+	
+	$result.="	
+			</table><br/><input type=\"submit\" value=\"Submit\" name=\"editWorkload\"></form>";
+	
+	
+	
+	return $result;
+ }
+ 
+ 	function getAccountReceivable(){
+ 	$this->{$this->db_group_name2}->select('StudentNumber,Name,College,ResidentFee, AppFee, TransFee, PeriodCovered');
+ 	$this->{$this->db_group_name2}->from('previousaccountables');
+ 	$this->{$this->db_group_name2}->order_by('Name');
+			$res = $this->{$this->db_group_name2}->get();
 		 $arr= $res->result();
 		if(current($arr)!=""){
 			$result = "<table border>
@@ -316,7 +1032,103 @@ function view_workload(){
 		}
  	return $result;
  }
+
+ 	function setTransTable($month){
+ 		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+ 		$result="";
+		$sql = "Select Count(*) from Transient where TYPE='INDIVIDUAL' and RATES='UP' and MONTH='$month'" ;
+		$result[0] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
+		$sql = "Select Count(*) from Transient where TYPE='INDIVIDUAL' and RATES='NON-UP' and MONTH='$month'" ;
+		$result[1] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
+		$sql = "Select Count(*) from Transient where TYPE='GROUP' and RATES='UP' and MONTH='$month'" ;
+		$result[2] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
+		$sql = "Select Count(*) from Transient where TYPE='GROUP' and RATES='NON-UP' and MONTH='$month'" ;
+		$result[3] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
+		
+		$sql = "SELECT SUM(AmountPaid) from Transient where TYPE='INDIVIDUAL' and MONTH='$month'" ;
+		$result[4] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
+		
+		$sql = "SELECT SUM(AmountPaid) from Transient where TYPE='GROUP' and MONTH='$month'" ;
+		$result[5] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
+		
+		
+		//$sql = "SELECT SUM(AmountPaid) FROM Transient" ;
+		//$result[4] = $this->{$this->db_group_name2}->query($sql) or die("tally".$this->{$this->db_group_name2}->error());
+		
+		$arr ="";
+		
+ 	for($i = 0; $i < count($result); $i++){
+			$ar = $result[$i]->result();
+			
+    		 $ar = (array)$ar[0];
+    		 $ar = array_values($ar);
+    		$arr[$i] = $ar[0];
+		}
+		return $arr;
+ }
+/* itatanong pa ito sa kanila
+ function getTransientInfo(){
+ 	$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+ 	
+ 	$this->{$this->db_group_name2}->select('FirstName,LastName,MidName');
+	$this->{$this->db_group_name2}->from('transient');
+	$info = $this->{$this->db_group_name2}->get();
+	$arr = "";
+	$cnt=0;	
+		foreach ($info->result() as $row)
+				{
+						
+				 $arr[$row->FirstName."*".$row->MidName."*".$row->LastName] = $this->getIndiTransientInfo($row->FirstName,$row->MidName,$row->LastName); 
+				}
+ return $arr;
+ }
+function getIndiTransientInfo($fname,$mname,$lname){
+	$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+ 
+	$this->{$this->db_group_name2}->select('CheckIn,CheckOut');
+	$this->{$this->db_group_name2}->where('FirstName',$fname); 
+	$this->{$this->db_group_name2}->where('LastName', $lname); 
+	$this->{$this->db_group_name2}->where('MidName',$mname); 
+	$this->{$this->db_group_name2}->from('transient');
+	$info = $this->{$this->db_group_name2}->get();
+		foreach ($info->result() as $row)
+				{
+						
+					return $row->CheckIn."*".$row->CheckOut."*".$row->Type."*".$row->Rates; 
+				}
+}*/
+ 
+	function getDormData($data){
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+ 
+		$this->{$this->db_group_name2}->select($data);
+		$info = $this->{$this->db_group_name2}->get('dorm');
+			foreach ($info->result() as $row)
+				{
+						
+					return $row->$data;
+				}
+				return "";
+	}
+
+	function getDormAppData($appName,$data){
+		$this->{$this->db_group_name2} = $this->load->database($this->db_group_name2, TRUE);
+ 
+		$this->{$this->db_group_name2}->select($data);
+		$this->{$this->db_group_name2}->where('ApplianceName',$appName); 
+		
+		$info = $this->{$this->db_group_name2}->get('dormappliance');
+		foreach ($info->result() as $row)
+				{
+						
+					return $row->$data;
+				}
+	return -1;
+	}
+
+	
 }
+
 
 
 
