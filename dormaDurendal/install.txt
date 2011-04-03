@@ -1,0 +1,54 @@
+Needed application(s):
+WampServer
+
+if not in durendal:
+
+Installation
+
+1. 	Install WampServer by following the installation process of the said application.
+    If you already have the server, skip this step and proceed to step 2.
+
+2. 	Start your WampServer by going to Start -> All Programs -> WampServer -> start WampServer.
+    An icon will appear on the right side of the taskbar and wait until the color of the icon becomes white.
+
+3. 	Test if your server is working properly by opening a web browser (preferably Google Chrome)
+    and go to "localhost/" by typing it in the address bar.
+    Server is working properly is it directs you to the Server Configuration page.
+
+4. 	Under the "Tools" option, click "phpmyadmin". This is where we will setup our database.
+
+5. 	On the phpmyadmin page, type "dormdatabase" under the "create new database" text field and then click "Create".
+	It should prompt you that a new database has been created.
+	Next, click on the "Import" tab and click the "Choose File" button. Select the "SQL" file which came along with the
+	project folder and hit "Go" button on the lower right. Again, the page will prompt you that you have successfully added
+	new tables.
+   
+6. 	Go back to the Configuration page by going to "localhost/".	
+	
+7. 	Download and extract the project folder to "C:\wamp\www".
+
+8. 	Go back to the web page and refresh the page (press F5 or the refresh button of the browser)
+
+9. 	Under "Your Projects" part of the said page, the extracted project folder will appear.
+    Click the latest project and this will redirect you to the home page of Dorma.
+
+10. After this steps and you wish to open the application on your next use, simply follow steps 2, 3 and 9.
+
+
+
+
+Update existing database and application
+
+1. 	If you wish to run a newly downloaded version of the application, follow steps 2 to 3.
+
+2. 	If you there is no need to update the database, simply skip steps 4 to 6 of the installation process and ignore all 
+	the steps after this.
+	Else, continue to step 4 and then select "dormdatabase" on the left hand side of the page.
+	The tables will appear and we wish to update this database.
+
+3.	Below the list of tables, click "Check All" and then click on the "Drop" tab on the upper part of the page.
+	Click "ok" and follow steps 5 to 10 again.
+	
+   if in durendal and there are errors:
+   
+   contact the developers.
